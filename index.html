@@ -140,16 +140,20 @@
           </div>
         </div>
 
-        <!-- CSV UPLOAD BOX FOR ADMIN -->
+        <!-- CSV UPLOAD & SYNC BOX FOR ADMIN -->
         <div id="adminCsvBox" class="hidden mt-4 p-3 bg-stone-200/50 dark:bg-stone-800/40 rounded-lg border border-stone-300/50 dark:border-stone-800">
           <div class="flex items-center space-x-1.5 mb-2 text-stone-700 dark:text-stone-300">
             <i data-lucide="upload" class="w-4 h-4 text-amber-700"></i>
-            <h4 class="text-xs font-bold">Nhập Excel / CSV</h4>
+            <h4 class="text-xs font-bold">Quản lý Dữ liệu (Admin)</h4>
           </div>
-          <p class="text-[10px] text-stone-500 mb-2 leading-relaxed">Chọn chủ đề trước, nạp file CSV phân cách bằng dấu chấm phẩy (;)</p>
+          <p class="text-[10px] text-stone-500 mb-2 leading-relaxed">Chọn chủ đề trước khi nạp file CSV phân cách bằng dấu chấm phẩy (;).</p>
           <div class="flex flex-col space-y-1.5">
             <button id="triggerCsvUpload" class="w-full bg-amber-700 hover:bg-amber-800 text-white text-[11px] py-1.5 px-2 rounded font-semibold text-center">
               Tải lên File CSV
+            </button>
+            <button id="manualSyncBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] py-1.5 px-2 rounded font-semibold text-center flex items-center justify-center space-x-1">
+              <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
+              <span>Lưu & Đồng bộ Server</span>
             </button>
             <button id="downloadSample" class="w-full bg-stone-300 dark:bg-stone-700 text-stone-800 dark:text-stone-200 text-[10px] py-1 px-2 rounded text-center hover:underline flex items-center justify-center space-x-1">
               <i data-lucide="download" class="w-3 h-3"></i>
@@ -1111,6 +1115,18 @@
         document.getElementById('csvFileInput').click();
       });
       document.getElementById('csvFileInput').addEventListener('change', handleCsvFileParser);
+
+      // Sự kiện bấm nút Lưu & Đồng bộ Server thủ công
+      document.getElementById('manualSyncBtn').addEventListener('click', async () => {
+        state.serverActive = true;
+        try {
+          saveState();
+          showAlert("Đã lưu và gửi toàn bộ dữ liệu lên Máy chủ / MongoDB thành công! ☁️🍃");
+        } catch (error) {
+          showAlert("Có lỗi xảy ra khi kết nối máy chủ! Vui lòng kiểm tra lại kết nối.");
+        }
+      });
+
       document.getElementById('downloadSample').addEventListener('click', () => {
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
         csvContent += "STT;Tiếng Trung;Pinyin;Nghĩa;VD China 1;Nghĩa 1;VD China 2;Nghĩa 2;VD China 3;Nghĩa 3\n";
@@ -1232,9 +1248,11 @@
         const merged = [...fullList, ...importedCards].sort((a, b) => a.stt - b.stt);
         
         state.idiomDecks[state.activeIdiomTheme] = merged;
+        state.serverActive = true; 
         saveState();
+        
         renderApp();
-        showAlert(`Đã nhập thành công và đồng bộ ${importedCards.length} thẻ thành ngữ mới.`);
+        showAlert(`Đã nhập thành công và đồng bộ ${importedCards.length} thẻ thành ngữ mới lên hệ thống!`);
       };
       reader.readAsText(file, 'UTF-8');
       e.target.value = null; 
