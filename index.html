@@ -24,20 +24,34 @@
     rt {
       user-select: none;
     }
-    /* Flip animation mechanics */
+
+    /* 3D Flip Card Mechanics */
     .perspective-1000 {
       perspective: 1000px;
+      -webkit-perspective: 1000px;
     }
     .preserve-3d {
       transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      will-change: transform;
     }
     .backface-hidden {
-      backface-visibility: hidden;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+      transform: translate3d(0, 0, 0);
+      -webkit-transform: translate3d(0, 0, 0);
     }
     .rotate-y-180 {
-      transform: rotateY(180deg);
+      transform: rotateY(180deg) !important;
+      -webkit-transform: rotateY(180deg) !important;
     }
-    /* Scrollbar Aesthetics */
+    
+    #flashcardInner {
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Custom Scrollbar Aesthetics */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -98,7 +112,7 @@
   <div class="flex-1 flex overflow-hidden relative">
 
     <!-- COLLAPSIBLE SIDEBAR -->
-    <aside id="sidebar" class="absolute md:relative z-30 h-full w-72 bg-stone-100 dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 transition-transform duration-300 ease-in-out flex flex-col justify-between">
+    <aside id="sidebar" class="absolute md:relative z-30 h-full w-72 bg-stone-100 dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 transition-transform duration-300 ease-in-out flex flex-col justify-between -translate-x-full md:translate-x-0">
       <div class="p-4 space-y-6 flex-1 overflow-y-auto">
         <div class="space-y-1">
           <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">Menu Ứng Dụng</h3>
@@ -279,13 +293,13 @@
           </div>
 
           <!-- FLIP CARD INTERACTIVE COMPONENT -->
-          <div id="flashcardElement" class="cursor-pointer group relative perspective-1000 h-[380px] md:h-[420px] w-full">
-            <div id="flashcardInner" class="relative preserve-3d w-full h-full duration-500 transform">
+          <div id="flashcardElement" class="cursor-pointer group relative perspective-1000 h-[380px] md:h-[420px] w-full select-none">
+            <div id="flashcardInner" class="relative preserve-3d w-full h-full duration-500">
               
               <!-- CARD FRONT -->
-              <div class="absolute inset-0 backface-hidden w-full h-full bg-stone-100 dark:bg-stone-900 rounded-3xl p-6 md:p-10 flex flex-col justify-between border-2 border-amber-800/20 dark:border-stone-800 shadow-xl">
+              <div id="cardFront" class="absolute inset-0 backface-hidden w-full h-full bg-stone-100 dark:bg-stone-900 rounded-3xl p-6 md:p-10 flex flex-col justify-between border-2 border-amber-800/20 dark:border-stone-800 shadow-xl transition-all duration-300">
                 <div class="absolute top-4 right-6 text-[10px] uppercase font-mono tracking-wider text-amber-900/30 dark:text-stone-500 select-none">Mặt Trước</div>
-                <div class="absolute inset-x-0 bottom-4 text-center text-[10px] text-stone-400 select-none">Nhấn phím Cách hoặc nhấp chuột để lật mặt sau</div>
+                <div class="absolute inset-x-0 bottom-4 text-center text-[10px] text-stone-400 select-none">Chạm nhẹ hoặc nhấp chuột để lật thẻ</div>
                 
                 <div class="flex justify-between items-start">
                   <div id="frontSttBubble" class="w-8 h-8 rounded-full border border-amber-800/30 flex items-center justify-center font-mono text-xs font-bold text-amber-800 dark:text-amber-400">0</div>
@@ -302,7 +316,7 @@
               </div>
 
               <!-- CARD BACK -->
-              <div class="absolute inset-0 backface-hidden rotate-y-180 w-full h-full bg-amber-50/10 dark:bg-stone-900 rounded-3xl p-6 md:p-8 flex flex-col justify-between border-2 border-amber-800/40 dark:border-stone-800 shadow-xl overflow-y-auto">
+              <div id="cardBack" class="absolute inset-0 backface-hidden rotate-y-180 w-full h-full bg-amber-50/10 dark:bg-stone-900 rounded-3xl p-6 md:p-8 flex flex-col justify-between border-2 border-amber-800/40 dark:border-stone-800 shadow-xl overflow-y-auto transition-all duration-300">
                 <div class="absolute top-4 right-6 text-[10px] uppercase font-mono tracking-wider text-amber-900/30 dark:text-stone-500 select-none">Mặt Sau</div>
                 
                 <div class="text-center border-b border-amber-800/20 pb-4 mt-2">
@@ -317,7 +331,7 @@
                   </div>
                 </div>
 
-                <div class="text-center text-[10px] text-stone-400 select-none">Nhấn phím Cách hoặc click để đóng thẻ</div>
+                <div class="text-center text-[10px] text-stone-400 select-none">Chạm nhẹ hoặc click để lật lại mặt trước</div>
               </div>
 
             </div>
@@ -378,7 +392,7 @@
     </main>
   </div>
 
-  <!-- --- MODAL OVERLAYS --- -->
+  <!-- MODAL OVERLAYS -->
 
   <!-- MODAL: ADMIN LOGIN -->
   <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -469,7 +483,7 @@
           
           <div class="space-y-1">
             <label class="block font-semibold text-stone-600 dark:text-stone-400">Ví dụ 1 (Định dạng Hán&#123;pinyin&#125;)</label>
-            <input type="text" id="newCardVd1" placeholder="学{xué}习{xí}不{bù}能{néng}半{bàn}途{tú}而{ér}废{fèi}。" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti" />
+            <input type="text" id="newCardVd1" placeholder="学{xué}习{xí}不{bù}能{néng}半{bàn}途{tú}er{ér}fèi{fèi}。" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti" />
             <input type="text" id="newCardNghia1" placeholder="Dịch nghĩa Việt ví dụ 1" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded" />
           </div>
 
@@ -514,7 +528,7 @@
     </div>
   </div>
 
-  <!-- --- JAVASCRIPT LOGIC CLIENT ENGINE --- -->
+  <!-- JAVASCRIPT LOGIC CLIENT ENGINE -->
   <script>
     const DEFAULT_SEED_DATA = {
       "Thành ngữ thông dụng": [
@@ -523,11 +537,11 @@
           tiengTrung: "半途而废",
           pinyin: "bàn tú ér fèi",
           nghia: "Bỏ dở nửa chừng",
-          vd1: "学{xué}习{xí}不{bù}能{néng}半{bàn}途{tú}而{ér}废{fèi}。",
+          vd1: "学{xué}习{xí}不{bù}能{néng}半{bàn}途{tú}er{ér}fèi{fèi}。",
           nghia1: "Học tập không thể bỏ dở nửa chừng.",
-          vd2: "做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}，不{bù}应{yīng}该{gāi}半{bàn}tú{tú}而{ér}废{fèi}。",
+          vd2: "做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}，不{bù}应{yīng}该{gāi}半{bàn}tú{tú}er{ér}fèi{fèi}。",
           nghia2: "Làm việc phải có đầu có đuôi, không nên bỏ dở nửa chừng.",
-          vd3: "他{tā}因{yīn}为{wèi}资{zī}金{jīn}不{bù}足{zú}，项{xiàng}目{mù}半{bàn}途{tú}而{ér}废{fèi}了{le}。",
+          vd3: "他{tā}因{yīn}为{wèi}资{zī}金{jīn}不{bù}足{zú}，项{xiàng}mù{mù}半{bàn}tú{tú}er{ér}fèi{fèi}了{le}。",
           nghia3: "Anh ấy vì thiếu kinh phí nên dự án đã phải bỏ dở giữa chừng."
         },
         {
@@ -535,11 +549,11 @@
           tiengTrung: "入乡随俗",
           pinyin: "rù xiāng suí sú",
           nghia: "Nhập gia tùy tục",
-          vd1: "去{qù}别{bié}国{guó}旅{lǚ}游{yóu}要{yào}入{rù}乡{xiāng}随{suí}俗{sú}。",
+          vd1: "去{qù}别{bié}国{guó}旅{lǚ}you{yóu}要{yào}入{rù}乡{xiāng}随{suí}sú{sú}。",
           nghia1: "Đi du lịch nước khác cần phải nhập gia tùy tục.",
-          vd2: "到{dào}了{le}新{xīn}环{huán}境{jìng}，就{jiù}得{děi}入{rù}乡{xiāng}随{suí}俗{sú}。",
+          vd2: "到{dào}了{le}xin{xīn}环{huán}境{jìng}，就{jiù}得{děi}入{rù}乡{xiāng}随{suí}sú{sú}。",
           nghia2: "Đến môi trường mới thì phải nhập gia tùy tục.",
-          vd3: "入{rù}乡{xiāng}随{suí}俗{sú}是{shì}一{yī}chủng{zhǒng}尊{zūn}重{zhòng}。",
+          vd3: "入{rù}乡{xiāng}随{suí}sú{sú}是{shì}一{yī}种{zhǒng}尊{zūn}重{zhòng}。",
           nghia3: "Nhập gia tùy tục là một sự tôn trọng."
         },
         {
@@ -547,11 +561,11 @@
           tiengTrung: "一心一意",
           pinyin: "yī xīn yī yì",
           nghia: "Một lòng một dạ (toàn tâm toàn ý)",
-          vd1: "他{tā}一{yī}xin{xīn}一{yī}意{yì}地{de}想{xiǎng}把{bǎ}汉{hàn}语{yǔ}学{xué}好{hǎo}。",
+          vd1: "他{tā}一{yī}心{xīn}一{yī}yi{yì}地{de}想{xiǎng}把{bǎ}hàn{hàn}语{yǔ}学{xué}好{hǎo}。",
           nghia1: "Anh ấy toàn tâm toàn ý muốn học tốt tiếng Trung.",
-          vd2: "只{zhǐ}有{yǒu}一{yī}心{xīn}一{yī}意{yì}，才{cái}能{néng}qu{qǔ}得{dé}好{hǎo}成{chéng}绩{jī}。",
+          vd2: "只{zhǐ}有{yǒu}一{yī}心{xīn}一{yī}yi{yì}，才{cái}能{néng}取{qǔ}得{dé}好{hǎo}chéng{chéng}绩{jī}。",
           nghia2: "Chỉ có một lòng một dạ mới có thể đạt thành tích tốt.",
-          vd3: "对{duì}待{dài}工{gōng}作{zuò}必{bì}须{xū}一{yī}xin{xīn}一{yī}意{yì}。",
+          vd3: "对{duì}待{dài}gōng{gōng}作{zuò}必{bì}sĩ{xū}一{yī}心{xīn}一{yī}yi{yì}。",
           nghia3: "Đối với công việc phải hết lòng hết sức."
         }
       ],
@@ -561,11 +575,11 @@
           tiengTrung: "温故知新",
           pinyin: "wēn gù zhī xīn",
           nghia: "Ôn cũ biết mới",
-          vd1: "温{wēn}故{gù}而{ér}知{zhī}新{xīn}，可{kě}以{yǐ}为{wéi}师{shī}矣{yǐ}。",
+          vd1: "温{wēn}故{gù}而{ér}zhi{zhī}xin{xīn}，可{kě}以{yǐ}为{wéi}shī{shī}矣{yǐ}。",
           nghia1: "Ôn lại chuyện cũ mà biết thêm chuyện mới, có thể làm thầy được rồi.",
-          vd2: "常{cháng}常{cháng}复{fù}习{xí}，温{wēn}故{gù}知{zhī}xin{xīn}。",
+          vd2: "常{cháng}常{cháng}复{fù}xi{xí}，温{wēn}gù{gù}zhi{zhī}xin{xīn}。",
           nghia2: "Thường xuyên ôn tập, để ôn cũ biết mới.",
-          vd3: "这{zhè}是{shì}一{yī}个{gè}温{wēn}故{gù}知{zhī}xin{xīn}的{de}好{hǎo}ji{jī}会{huì}。",
+          vd3: "这{zhè}是{shì}一{yī}个{gè}温{wēn}gù{gù}zhi{zhī}xin{xīn}的{de}好{hǎo}ji{jī}会{huì}。",
           nghia3: "Đây là một cơ hội tốt để ôn cũ biết mới."
         }
       ]
@@ -573,25 +587,21 @@
 
     const state = {
       isAdmin: false,
-      activeTab: 'dashboard', // 'dashboard' | 'idioms'
+      activeTab: 'dashboard',
       idiomDecks: {},
       activeIdiomTheme: '',
       currentCardIndex: 0,
       isFlipped: false,
-      masteredCards: {}, // { "Theme": [1, 2] }
-      filterMode: 'all', // 'all' | 'unmastered' | 'mastered'
+      masteredCards: {},
+      filterMode: 'all',
       serverActive: false,
       touchStartX: 0,
-      touchEndX: 0
+      touchStartY: 0
     };
 
-    // Callback store for Custom Confirmation Modals
     let confirmCallback = null;
 
     function renderApp() {
-      // Toggle sidebar open/close visual classes
-      const sidebar = document.getElementById('sidebar');
-      // Tab Switching
       if (state.activeTab === 'dashboard') {
         document.getElementById('tabDashboard').classList.remove('hidden');
         document.getElementById('tabIdioms').classList.add('hidden');
@@ -606,10 +616,8 @@
         updateIdiomsDeckView();
       }
 
-      // Render Themes list
       renderThemesInSidebar();
 
-      // Update admin UI sections
       if (state.isAdmin) {
         document.getElementById('adminIndicator').classList.remove('hidden');
         document.getElementById('adminIndicator').classList.add('flex');
@@ -628,7 +636,6 @@
         document.getElementById('adminCsvBox').classList.add('hidden');
       }
 
-      // Sync Icons
       lucide.createIcons();
     }
 
@@ -711,7 +718,6 @@
       document.getElementById('progressBarLabel').innerText = `${pct}% (${mastered}/${total})`;
       document.getElementById('progressBar').style.width = `${pct}%`;
 
-      // Theme breakdown view
       const detailContainer = document.getElementById('themeProgressDetails');
       detailContainer.innerHTML = '';
       
@@ -738,7 +744,6 @@
     function updateIdiomsDeckView() {
       document.getElementById('currentThemeLabel').innerText = state.activeIdiomTheme || "Chưa chọn";
       
-      // Filter status update active class
       const filters = ['All', 'Unmastered', 'Mastered'];
       filters.forEach(f => {
         const el = document.getElementById(`filter${f}`);
@@ -762,7 +767,6 @@
       deckContainer.classList.remove('hidden');
       emptyState.classList.add('hidden');
 
-      // Index boundary corrections
       if (state.currentCardIndex >= cards.length) {
         state.currentCardIndex = Math.max(0, cards.length - 1);
       }
@@ -770,7 +774,6 @@
       const currentCard = cards[state.currentCardIndex];
       const isMastered = (state.masteredCards[state.activeIdiomTheme] || []).includes(currentCard.stt);
 
-      // Card Header Information labels
       document.getElementById('cardNavLabel').innerText = `Thẻ ${state.currentCardIndex + 1} / ${cards.length}`;
       document.getElementById('cardSttLabel').innerText = `STT gốc: ${currentCard.stt}`;
       
@@ -783,13 +786,11 @@
         masteryLabel.innerText = "Chưa thuộc";
       }
 
-      // Populate Card Details
       document.getElementById('frontSttBubble').innerText = currentCard.stt;
       document.getElementById('cardFrontText').innerText = currentCard.tiengTrung;
       document.getElementById('cardFrontPinyin').innerText = `[ ${currentCard.pinyin} ]`;
       document.getElementById('cardBackNghia').innerText = currentCard.nghia;
 
-      // Populate Example Sentences lists on the card back
       const examplesContainer = document.getElementById('cardExamplesContainer');
       examplesContainer.innerHTML = '';
 
@@ -813,16 +814,25 @@
         }
       });
 
-      // Update structural buttons state
       document.getElementById('prevCardBtn').disabled = (state.currentCardIndex === 0);
       document.getElementById('nextCardBtn').disabled = (state.currentCardIndex === cards.length - 1);
 
-      // Render actual Flip transition classes
       const cardInner = document.getElementById('flashcardInner');
+      const cardFront = document.getElementById('cardFront');
+      const cardBack = document.getElementById('cardBack');
+
       if (state.isFlipped) {
         cardInner.classList.add('rotate-y-180');
+        cardFront.style.pointerEvents = 'none';
+        cardBack.style.pointerEvents = 'auto';
+        cardFront.style.zIndex = '0';
+        cardBack.style.zIndex = '20';
       } else {
         cardInner.classList.remove('rotate-y-180');
+        cardFront.style.pointerEvents = 'auto';
+        cardBack.style.pointerEvents = 'none';
+        cardFront.style.zIndex = '20';
+        cardBack.style.zIndex = '0';
       }
     }
 
@@ -843,7 +853,6 @@
       localStorage.setItem('zh_mastered_cards', JSON.stringify(state.masteredCards));
       localStorage.setItem('zh_is_admin', state.isAdmin ? 'true' : 'false');
       
-      // Auto API updates if live connection is identified
       if (state.serverActive) {
         syncStateToServer();
       }
@@ -877,7 +886,6 @@
       confirmCallback = callback;
     }
 
-    // Modal Close Helper
     function hideModals() {
       const modals = ['loginModal', 'addThemeModal', 'addCardModal', 'customAlert', 'customConfirm'];
       modals.forEach(id => {
@@ -888,14 +896,13 @@
     }
 
     window.addEventListener('load', async () => {
-      // 1. Attaching modal close clicks
       document.querySelectorAll('.modalClose').forEach(btn => {
         btn.addEventListener('click', hideModals);
       });
 
-      // 2. Sidebar Navigation Clicking
       document.getElementById('sidebarToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('-translate-x-full');
       });
       document.getElementById('navDashboard').addEventListener('click', () => {
         state.activeTab = 'dashboard';
@@ -906,7 +913,6 @@
         renderApp();
       });
 
-      // 3. Modals triggering
       document.getElementById('loginModalOpen').addEventListener('click', () => {
         document.getElementById('loginErrorMessage').classList.add('hidden');
         document.getElementById('loginModal').classList.remove('hidden');
@@ -921,7 +927,6 @@
         document.getElementById('addCardModal').classList.add('flex');
       });
 
-      // 4. Verification Form Submission
       document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const user = document.getElementById('loginUsername').value;
@@ -945,7 +950,6 @@
         showAlert("Đã thoát tài khoản quản trị.");
       });
 
-      // 5. Creating New Theme
       document.getElementById('addThemeForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const themeName = document.getElementById('newThemeName').value.trim();
@@ -967,7 +971,6 @@
         document.getElementById('addThemeForm').reset();
       });
 
-      // 6. Creating New Card
       document.getElementById('addCardForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const themeCards = state.idiomDecks[state.activeIdiomTheme] || [];
@@ -998,36 +1001,56 @@
         document.getElementById('addCardForm').reset();
       });
 
-      // 7. Interactive Deck Flipping and Navigation click actions
-      document.getElementById('flashcardElement').addEventListener('click', (e) => {
-        // Prevent flipping when clicking administrative deletes inside front
-        if (e.target.closest('#quickDeleteCardBtn')) return;
-        state.isFlipped = !state.isFlipped;
-        updateIdiomsDeckView();
+      /* --- SWIPE & FLIP TOUCH ARCHITECTURE --- */
+      const fc = document.getElementById('flashcardElement');
+      let swipeOccurred = false;
+
+      fc.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        state.touchStartX = touch.clientX;
+        state.touchStartY = touch.clientY;
+        swipeOccurred = false;
+      }, { passive: true });
+
+      fc.addEventListener('touchend', (e) => {
+        const touch = e.changedTouches[0];
+        const diffX = touch.clientX - state.touchStartX;
+        const diffY = touch.clientY - state.touchStartY;
+
+        if (Math.abs(diffX) > 40 && Math.abs(diffY) < 40) {
+          swipeOccurred = true;
+          if (diffX < 0) {
+            navigateNext();
+          } else {
+            navigatePrev();
+          }
+        }
+      }, { passive: true });
+
+      fc.addEventListener('click', (e) => {
+        if (swipeOccurred) {
+          swipeOccurred = false;
+          return;
+        }
+
+        if (e.target.closest('#quickDeleteCardBtn') || e.target.closest('button') || e.target.closest('a')) {
+          return;
+        }
+
+        toggleFlip();
       });
 
       document.getElementById('prevCardBtn').addEventListener('click', () => {
-        if (state.currentCardIndex > 0) {
-          state.isFlipped = false;
-          state.currentCardIndex--;
-          updateIdiomsDeckView();
-        }
+        navigatePrev();
       });
 
       document.getElementById('nextCardBtn').addEventListener('click', () => {
-        const cards = getFilteredCards();
-        if (state.currentCardIndex < cards.length - 1) {
-          state.isFlipped = false;
-          state.currentCardIndex++;
-          updateIdiomsDeckView();
-        }
+        navigateNext();
       });
 
-      // 8. Progress marking buttons
       document.getElementById('markMastered').addEventListener('click', () => handleMarkProgress(true));
       document.getElementById('markUnmastered').addEventListener('click', () => handleMarkProgress(false));
 
-      // 9. Shuffle, Restoring & Deletion events
       document.getElementById('shuffleBtn').addEventListener('click', () => {
         const currentThemeCards = state.idiomDecks[state.activeIdiomTheme] || [];
         if (currentThemeCards.length <= 1) return;
@@ -1072,13 +1095,11 @@
         });
       });
 
-      // 10. Filters listeners
       document.getElementById('filterAll').addEventListener('click', () => selectFilter('all'));
       document.getElementById('filterUnmastered').addEventListener('click', () => selectFilter('unmastered'));
       document.getElementById('filterMastered').addEventListener('click', () => selectFilter('mastered'));
       document.getElementById('emptyStateResetFilter').addEventListener('click', () => selectFilter('all'));
 
-      // 11. Modal Custom overlay decisions
       document.getElementById('customAlertClose').addEventListener('click', hideModals);
       document.getElementById('customConfirmCancel').addEventListener('click', hideModals);
       document.getElementById('customConfirmOk').addEventListener('click', () => {
@@ -1086,17 +1107,6 @@
         hideModals();
       });
 
-      // 12. Touch Handlers for mobile Swiping
-      const fc = document.getElementById('flashcardElement');
-      fc.addEventListener('touchstart', (e) => {
-        state.touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
-      fc.addEventListener('touchend', (e) => {
-        state.touchEndX = e.changedTouches[0].screenX;
-        handleSwipeAction();
-      }, { passive: true });
-
-      // 13. CSV Bulk Upload listeners
       document.getElementById('triggerCsvUpload').addEventListener('click', () => {
         document.getElementById('csvFileInput').click();
       });
@@ -1104,7 +1114,7 @@
       document.getElementById('downloadSample').addEventListener('click', () => {
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
         csvContent += "STT;Tiếng Trung;Pinyin;Nghĩa;VD China 1;Nghĩa 1;VD China 2;Nghĩa 2;VD China 3;Nghĩa 3\n";
-        csvContent += "1;半途而废;bàn tú ér fèi;Bỏ dở nửa chừng;学{xué}习{xí}不{bù}能{néng}半{bàn}tú{tú}er{ér}fèi{fèi}。;Học tập không thể bỏ dở nửa chừng.;做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}。;Làm việc cần có đầu có đuôi.;;\n";
+        csvContent += "1;半途而废;bàn tú ér fèi;Bỏ dở nửa chừng;学{xué}习{xí}不{bù}能{néng}bàn{bàn}tú{tú}er{ér}fèi{fèi}。;Học tập không thể bỏ dở nửa chừng.;做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}。;Làm việc cần có đầu có đuôi.;;\n";
         
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -1118,7 +1128,28 @@
       await initializeDatabaseBoot();
     });
 
-    // Handle Mark Learnt Progress
+    function toggleFlip() {
+      state.isFlipped = !state.isFlipped;
+      updateIdiomsDeckView();
+    }
+
+    function navigateNext() {
+      const cards = getFilteredCards();
+      if (state.currentCardIndex < cards.length - 1) {
+        state.isFlipped = false;
+        state.currentCardIndex++;
+        updateIdiomsDeckView();
+      }
+    }
+
+    function navigatePrev() {
+      if (state.currentCardIndex > 0) {
+        state.isFlipped = false;
+        state.currentCardIndex--;
+        updateIdiomsDeckView();
+      }
+    }
+
     function handleMarkProgress(isMastered) {
       const currentCards = getFilteredCards();
       if (currentCards.length === 0) return;
@@ -1157,30 +1188,6 @@
       updateIdiomsDeckView();
     }
 
-    // Touch Swiping logic
-    function handleSwipeAction() {
-      const currentCards = getFilteredCards();
-      if (currentCards.length === 0) return;
-      const diff = state.touchStartX - state.touchEndX;
-      
-      if (diff > 50) {
-        // Swiped Left -> Next Card
-        if (state.currentCardIndex < currentCards.length - 1) {
-          state.isFlipped = false;
-          state.currentCardIndex++;
-          updateIdiomsDeckView();
-        }
-      } else if (diff < -50) {
-        // Swiped Right -> Prev Card
-        if (state.currentCardIndex > 0) {
-          state.isFlipped = false;
-          state.currentCardIndex--;
-          updateIdiomsDeckView();
-        }
-      }
-    }
-
-    // Dynamic Client-side CSV Semicolon Parser
     function handleCsvFileParser(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1230,7 +1237,7 @@
         showAlert(`Đã nhập thành công và đồng bộ ${importedCards.length} thẻ thành ngữ mới.`);
       };
       reader.readAsText(file, 'UTF-8');
-      e.target.value = null; // reset input
+      e.target.value = null; 
     }
 
     function deleteThemeTrigger(themeName) {
@@ -1248,7 +1255,6 @@
     }
 
     async function initializeDatabaseBoot() {
-      // Check if Node server backend is active
       try {
         const response = await fetch('/api/themes');
         if (response.ok) {
@@ -1264,7 +1270,6 @@
         console.info("Stand-alone execution detected, loading direct LocalStorage values.");
       }
 
-      // LocalStorage fallbacks if server offline or returned invalid datasets
       if (Object.keys(state.idiomDecks).length === 0) {
         const localIdioms = localStorage.getItem('zh_idiom_decks');
         const localMastered = localStorage.getItem('zh_mastered_cards');
@@ -1273,7 +1278,6 @@
         if (localIdioms) {
           state.idiomDecks = JSON.parse(localIdioms);
         } else {
-          // Automatic database seeding for direct workspace previews
           state.idiomDecks = DEFAULT_SEED_DATA;
           localStorage.setItem('zh_idiom_decks', JSON.stringify(DEFAULT_SEED_DATA));
         }
@@ -1289,17 +1293,13 @@
         }
       }
 
-      // Set default selected items
       const keys = Object.keys(state.idiomDecks);
       state.activeIdiomTheme = keys.includes(state.activeIdiomTheme) ? state.activeIdiomTheme : (keys[0] || '');
       
-      // Execute the view compilation
       renderApp();
     }
 
-    // Keyboard Hotkey binding actions
     window.addEventListener('keydown', (e) => {
-      // Ignore key events when modals are active
       const modals = ['loginModal', 'addThemeModal', 'addCardModal', 'customAlert', 'customConfirm'];
       const activeModal = modals.some(m => !document.getElementById(m).classList.contains('hidden'));
       if (activeModal || state.activeTab !== 'idioms') return;
@@ -1309,20 +1309,11 @@
 
       if (e.code === 'Space') {
         e.preventDefault();
-        state.isFlipped = !state.isFlipped;
-        updateIdiomsDeckView();
+        toggleFlip();
       } else if (e.code === 'ArrowRight') {
-        if (state.currentCardIndex < cards.length - 1) {
-          state.isFlipped = false;
-          state.currentCardIndex++;
-          updateIdiomsDeckView();
-        }
+        navigateNext();
       } else if (e.code === 'ArrowLeft') {
-        if (state.currentCardIndex > 0) {
-          state.isFlipped = false;
-          state.currentCardIndex--;
-          updateIdiomsDeckView();
-        }
+        navigatePrev();
       }
     });
   </script>
