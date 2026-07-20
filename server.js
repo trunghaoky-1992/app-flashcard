@@ -12,10 +12,10 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Connect to secure MongoDB Atlas clusters
-const MONGO_URI = "mongodb+srv://trunghaoky_db_user:PaTLD228ERN7mcwp@cluster0.oh1tq0d.mongodb.net/hsk6_flashcards?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI = process.env.MONGODB_URI || "mongodb+srv://trunghaoky_db_user:PaTLD228ERN7mcwp@cluster0.oh1tq0d.mongodb.net/hsk6_flashcards?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(MONGO_URI)
 .then(() => console.log("Successful secure connection with MongoDB Atlas established!"))
@@ -51,6 +51,7 @@ app.get('/api/themes', async (req, res) => {
     }
     res.json(globalState);
   } catch (err) {
+    console.error("Get Themes Error:", err);
     res.status(500).json({ error: "Could not read records from MongoDB." });
   }
 });
@@ -66,15 +67,16 @@ app.post('/api/themes/sync', async (req, res) => {
     const result = await AppState.findOneAndUpdate(
       { identifier: "global_state" },
       { idiomDecks, masteredCards },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, message: "Real-time updates synced successfully.", result });
   } catch (err) {
+    console.error("Sync Error:", err);
     res.status(500).json({ error: "Failed to persist synchronization to MongoDB." });
   }
 });
 
-// Send UI client - FIXED PATH FOR NEW EXPRESS VERSIONS
+// Send UI client
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
