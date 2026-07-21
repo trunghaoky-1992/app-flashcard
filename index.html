@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sổ Tay Thành Ngữ Hoa - Việt</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sổ Tay Thành Ngữ Hoa - Việt | Chung Hạo Kỳ</title>
   
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
   
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Google Fonts for KaiTi / Noto Serif SC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&display=swap');
-    
     .font-kaiti {
       font-family: "KaiTi", "STKaiti", "BiauKai", "Noto Serif SC", serif;
     }
     .font-vietnamese {
       font-family: "Times New Roman", Times, Georgia, serif;
     }
-    ruby {
-      ruby-position: over;
-      ruby-align: center;
-    }
-    rt {
-      user-select: none;
-    }
-
-    /* 3D Flip Card Mechanics */
+    
+    /* 3D Perspective & GPU Acceleration */
     .perspective-1000 {
-      perspective: 1000px;
-      -webkit-perspective: 1000px;
+      perspective: 1200px;
+      -webkit-perspective: 1200px;
     }
     .preserve-3d {
       transform-style: preserve-3d;
@@ -36,22 +35,33 @@
       will-change: transform;
     }
     .backface-hidden {
-      backface-visibility: hidden !important;
-      -webkit-backface-visibility: hidden !important;
-      transform: translate3d(0, 0, 0);
-      -webkit-transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
     .rotate-y-180 {
-      transform: rotateY(180deg) !important;
-      -webkit-transform: rotateY(180deg) !important;
-    }
-    
-    #flashcardInner {
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
 
-    /* Custom Scrollbar Aesthetics */
+    /* Pointer & Z-Index fixes for Mobile Touch Flipping */
+    .card-front {
+      z-index: 2;
+    }
+    .card-back {
+      z-index: 1;
+      transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
+    }
+    .flipped .card-front {
+      z-index: 1;
+      pointer-events: none;
+    }
+    .flipped .card-back {
+      z-index: 2;
+      pointer-events: auto;
+    }
+
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -68,15 +78,15 @@
     }
   </style>
 </head>
-<body class="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-vietnamese min-h-screen flex flex-col transition-colors duration-200">
+<body class="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-vietnamese flex flex-col transition-colors duration-200 selection:bg-amber-200">
 
-  <!-- HEADER BAR -->
   <header class="sticky top-0 z-40 bg-stone-100/90 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 py-3 px-4 md:px-6 flex items-center justify-between shadow-sm">
     <div class="flex items-center space-x-3">
-      <button id="sidebarToggle" class="p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors">
-        <i data-lucide="menu" class="w-6 h-6"></i>
+      <button id="toggleSidebarBtn" class="p-2 rounded-md hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors" title="Bật/Tắt Menu">
+        <i class="fa-solid fa-bars text-lg"></i>
       </button>
       
+      <!-- Owner Seal -->
       <div class="flex items-center space-x-2.5">
         <div class="relative group flex items-center">
           <div class="bg-red-700 text-white font-kaiti font-bold text-lg md:text-xl py-1 px-2.5 tracking-wider rounded-sm shadow-md border border-red-800 flex items-center justify-center cursor-help select-none">
@@ -90,74 +100,69 @@
           <h1 class="text-base md:text-lg font-bold tracking-tight text-stone-800 dark:text-stone-100 font-vietnamese uppercase">
             Học Viện Hoa - Việt
           </h1>
-          <p class="text-[10px] text-stone-500 dark:text-stone-400 font-vietnamese">Hệ thống ghi nhớ ngữ nghĩa nâng cao</p>
+          <p class="text-[10px] text-stone-500 dark:text-stone-400 font-vietnamese">Hệ thống ghi nhớ thành ngữ bằng flashcard</p>
         </div>
       </div>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <div id="adminIndicator" class="hidden items-center space-x-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 py-1 px-3 rounded-full">
-        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-        <span class="text-xs font-semibold text-amber-800 dark:text-amber-300">Chế độ Admin</span>
-        <button id="logoutBtn" class="ml-2 text-xs text-rose-700 dark:text-rose-400 hover:underline font-bold">[Thoát]</button>
-      </div>
-      <button id="loginModalOpen" class="flex items-center space-x-1.5 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 py-1.5 px-3.5 rounded-md text-xs font-semibold border border-stone-300 dark:border-stone-700">
-        <i data-lucide="lock" class="w-3.5 h-3.5 text-stone-600 dark:text-stone-400"></i>
-        <span>Quản trị viên</span>
-      </button>
+    <!-- Admin status & Login button -->
+    <div id="adminHeaderStatus" class="flex items-center space-x-2">
+      <!-- Dynamic rendering via JavaScript -->
     </div>
   </header>
 
-  <!-- CORE WRAPPER -->
   <div class="flex-1 flex overflow-hidden relative">
 
-    <!-- COLLAPSIBLE SIDEBAR -->
-    <aside id="sidebar" class="absolute md:relative z-30 h-full w-72 bg-stone-100 dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 transition-transform duration-300 ease-in-out flex flex-col justify-between -translate-x-full md:translate-x-0">
+    <!-- Collapsible Sidebar -->
+    <aside id="sidebar" class="absolute md:relative z-30 h-full w-72 bg-stone-100 dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 transition-transform duration-300 ease-in-out flex flex-col justify-between translate-x-0">
       <div class="p-4 space-y-6 flex-1 overflow-y-auto">
+        <!-- Navigation Menu -->
         <div class="space-y-1">
-          <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">Menu Ứng Dụng</h3>
-          <button id="navDashboard" class="w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-amber-100/60 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 font-bold border-l-4 border-amber-700">
-            <i data-lucide="trending-up" class="w-4 h-4"></i>
+          <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2 font-vietnamese">Menu Ứng Dụng</h3>
+          <button id="navDashboardBtn" class="w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all hover:bg-stone-200/50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400">
+            <i class="fa-solid fa-chart-line w-4"></i>
             <span>Trang cá nhân / Thống kê</span>
           </button>
-          <button id="navIdioms" class="w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-800">
-            <i data-lucide="layers" class="w-4 h-4"></i>
+          <button id="navIdiomsBtn" class="w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-amber-100/60 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 font-bold border-l-4 border-amber-700">
+            <i class="fa-solid fa-layer-group w-4"></i>
             <span>Sổ Tay Thành Ngữ</span>
           </button>
         </div>
 
         <hr class="border-stone-200 dark:border-stone-800" />
 
+        <!-- Themes List -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Chủ đề Thành ngữ</h3>
-            <button id="addThemeBtn" class="hidden p-1 rounded bg-stone-200 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-amber-900 text-stone-600 dark:text-stone-300" title="Thêm chủ đề mới">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider font-vietnamese">
+              Chủ đề Thành ngữ
+            </h3>
+            <button id="addThemeBtn" class="p-1 rounded bg-stone-200 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-amber-900 text-stone-600 dark:text-stone-300 transition-colors hidden" title="Thêm chủ đề mới">
+              <i class="fa-solid fa-plus text-xs"></i>
             </button>
           </div>
-          <div id="themesList" class="space-y-1 max-h-64 overflow-y-auto pr-1">
-            <!-- Populated via script -->
+
+          <div id="themeListContainer" class="space-y-1 max-h-64 overflow-y-auto pr-1">
+            <!-- Dynamic themes rendered via JavaScript -->
           </div>
         </div>
 
-        <!-- CSV UPLOAD & SYNC BOX FOR ADMIN -->
-        <div id="adminCsvBox" class="hidden mt-4 p-3 bg-stone-200/50 dark:bg-stone-800/40 rounded-lg border border-stone-300/50 dark:border-stone-800">
+        <!-- CSV Bulk Import Section (Admin Only) -->
+        <div id="csvImportSection" class="mt-4 p-3 bg-stone-200/50 dark:bg-stone-800/40 rounded-lg border border-stone-300/50 dark:border-stone-800 hidden">
           <div class="flex items-center space-x-1.5 mb-2 text-stone-700 dark:text-stone-300">
-            <i data-lucide="upload" class="w-4 h-4 text-amber-700"></i>
-            <h4 class="text-xs font-bold">Quản lý Dữ liệu (Admin)</h4>
+            <i class="fa-solid fa-file-csv text-amber-700"></i>
+            <h4 class="text-xs font-bold font-vietnamese">Nhập Excel / CSV & AI Pinyin</h4>
           </div>
-          <p class="text-[10px] text-stone-500 mb-2 leading-relaxed">Chọn chủ đề trước khi nạp file CSV phân cách bằng dấu chấm phẩy (;).</p>
+          <p class="text-[10px] text-stone-500 mb-2 leading-relaxed font-vietnamese">
+            Tải tệp CSV phân tách chấm phẩy (;). AI sẽ tự động tạo Pinyin chuẩn cho các ví dụ thiếu!
+          </p>
           <div class="flex flex-col space-y-1.5">
-            <button id="triggerCsvUpload" class="w-full bg-amber-700 hover:bg-amber-800 text-white text-[11px] py-1.5 px-2 rounded font-semibold text-center">
-              Tải lên File CSV
+            <button id="uploadCsvTriggerBtn" class="w-full bg-amber-700 hover:bg-amber-800 text-white text-[11px] py-1.5 px-2 rounded font-semibold text-center font-vietnamese transition-colors">
+              <i class="fa-solid fa-upload mr-1"></i> Tải lên File CSV
             </button>
-            <button id="manualSyncBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] py-1.5 px-2 rounded font-semibold text-center flex items-center justify-center space-x-1">
-              <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
-              <span>Lưu & Đồng bộ Server</span>
-            </button>
-            <button id="downloadSample" class="w-full bg-stone-300 dark:bg-stone-700 text-stone-800 dark:text-stone-200 text-[10px] py-1 px-2 rounded text-center hover:underline flex items-center justify-center space-x-1">
-              <i data-lucide="download" class="w-3 h-3"></i>
-              <span>Tải Mẫu CSV</span>
+            <button id="downloadSampleCsvBtn" class="w-full bg-stone-300 dark:bg-stone-700 text-stone-800 dark:text-stone-200 text-[10px] py-1 px-2 rounded text-center hover:underline flex items-center justify-center space-x-1">
+              <i class="fa-solid fa-download"></i>
+              <span>Tải Mẫu Địn Dạng CSV</span>
             </button>
           </div>
           <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
@@ -165,375 +170,407 @@
       </div>
 
       <div class="p-4 bg-stone-200/40 dark:bg-stone-900/40 border-t border-stone-200 dark:border-stone-800 text-center">
-        <p class="text-[10px] text-stone-500">Biên tập viên: <strong>Chung Hạo Kỳ (钟浩奇)</strong></p>
+        <p class="text-[10px] text-stone-500 font-vietnamese">
+          Biên tập viên: <strong>Chung Hạo Kỳ (钟浩奇)</strong>
+        </p>
         <p class="text-[9px] text-stone-400 mt-0.5">© 2026 Học Viện Hoa-Việt. Bảo lưu mọi quyền.</p>
       </div>
     </aside>
 
-    <!-- MAIN BODY WINDOW -->
+    <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto p-4 md:p-6 transition-all">
       
-      <!-- TAB 1: DASHBOARD -->
-      <section id="tabDashboard" class="max-w-4xl mx-auto space-y-6">
+      <!-- DASHBOARD VIEW -->
+      <div id="dashboardView" class="max-w-4xl mx-auto space-y-6 hidden">
+        <!-- Profile Banner -->
         <div class="bg-gradient-to-r from-stone-900 to-rose-950 text-white p-6 md:p-8 rounded-2xl shadow-xl border border-rose-900/30 relative overflow-hidden">
-          <div class="absolute right-0 top-0 opacity-10 font-kaiti text-9xl translate-x-12 -translate-y-6 pointer-events-none select-none">学无止境</div>
-          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="absolute right-0 top-0 opacity-10 font-kaiti text-9xl translate-x-12 -translate-y-6 pointer-events-none select-none">
+            学无止境
+          </div>
+          <div class="relative z-10">
             <div>
-              <span class="bg-rose-700 text-white font-semibold text-xs py-1 px-2.5 rounded-full uppercase tracking-wider">Hệ thống ghi nhớ thông minh</span>
-              <h2 class="text-2xl md:text-4xl font-bold mt-2 leading-tight">Xin chào Học viên Đường xa</h2>
-              <p class="text-sm text-stone-300 mt-2 max-w-xl">
-                Bản quyền nội dung được hiệu đính chuẩn xác bởi học giả <span class="text-amber-300 font-semibold font-kaiti">钟浩奇</span>. Chúc bạn có những giây phút tự học khai phóng trí tuệ.
+              <span class="bg-rose-700 text-white font-semibold text-xs py-1 px-2.5 rounded-full uppercase tracking-wider">
+                Sổ Tay Thành Ngữ Cao Cấp
+              </span>
+              <h2 class="text-lg md:text-2xl font-bold mt-2 font-vietnamese leading-tight">
+                Chinh Phục Ngôn Từ - Nâng Tầm Giao Tiếp
+              </h2>
+              <p class="text-xs md:text-sm text-stone-300 mt-2 max-w-xl font-vietnamese leading-relaxed">
+                Cùng <span class="text-amber-300 font-semibold font-kaiti">钟浩奇</span> khai phá kho tàng thành ngữ nhé!
               </p>
-            </div>
-            <div class="flex items-center space-x-3 bg-white/10 p-3 rounded-xl border border-white/10 backdrop-blur-sm self-start md:self-auto">
-              <div class="bg-rose-600/80 font-kaiti font-bold text-3xl py-2 px-3 rounded shadow-md">钟</div>
-              <div>
-                <p class="text-xs text-stone-300">Biên tập viên</p>
-                <h4 class="font-bold text-amber-200 text-sm">钟浩奇 (Chung Hạo Kỳ)</h4>
-              </div>
             </div>
           </div>
         </div>
 
+        <!-- Statistics Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-white dark:bg-stone-900 p-5 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 flex items-center justify-between">
             <div>
-              <p class="text-xs text-stone-500 font-semibold uppercase tracking-wider">Tổng số Thành ngữ</p>
-              <h3 id="statTotal" class="text-2xl md:text-3xl font-bold mt-1 text-stone-800 dark:text-stone-100">0</h3>
+              <p class="text-xs text-stone-500 font-vietnamese font-semibold uppercase tracking-wider">Tổng số Thành ngữ</p>
+              <h3 id="statTotalIdioms" class="text-2xl md:text-3xl font-bold mt-1 text-stone-800 dark:text-stone-100">0</h3>
             </div>
             <div class="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 rounded-lg">
-              <i data-lucide="layers" class="w-6 h-6"></i>
+              <i class="fa-solid fa-layer-group text-xl"></i>
             </div>
           </div>
+
           <div class="bg-white dark:bg-stone-900 p-5 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 flex items-center justify-between">
             <div>
-              <p class="text-xs text-stone-500 font-semibold uppercase tracking-wider">Đã thuộc</p>
-              <h3 id="statMastered" class="text-2xl md:text-3xl font-bold mt-1 text-emerald-700 dark:text-emerald-400">0</h3>
+              <p class="text-xs text-stone-500 font-vietnamese font-semibold uppercase tracking-wider">Thành ngữ đã thuộc</p>
+              <h3 id="statMasteredIdioms" class="text-2xl md:text-3xl font-bold mt-1 text-emerald-700 dark:text-emerald-400">0</h3>
             </div>
             <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 rounded-lg">
-              <i data-lucide="check-circle" class="w-6 h-6"></i>
+              <i class="fa-solid fa-circle-check text-xl"></i>
             </div>
           </div>
+
           <div class="bg-white dark:bg-stone-900 p-5 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 flex items-center justify-between">
             <div>
-              <p class="text-xs text-stone-500 font-semibold uppercase tracking-wider">Chưa thuộc</p>
-              <h3 id="statUnmastered" class="text-2xl md:text-3xl font-bold mt-1 text-rose-700 dark:text-rose-400">0</h3>
+              <p class="text-xs text-stone-500 font-vietnamese font-semibold uppercase tracking-wider">Thành ngữ chưa thuộc</p>
+              <h3 id="statUnmasteredIdioms" class="text-2xl md:text-3xl font-bold mt-1 text-rose-700 dark:text-rose-400">0</h3>
             </div>
             <div class="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-400 rounded-lg">
-              <i data-lucide="alert-circle" class="w-6 h-6"></i>
+              <i class="fa-solid fa-circle-exclamation text-xl"></i>
             </div>
           </div>
         </div>
 
-        <div class="bg-white dark:bg-stone-900 p-6 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800">
-          <h3 class="text-lg font-bold mb-4 flex items-center space-x-2">Tiến trình Ghi nhớ Thành ngữ</h3>
-          <div class="space-y-4">
-            <div>
-              <div class="flex justify-between text-xs font-semibold mb-1 text-stone-600 dark:text-stone-400">
-                <span>Tỷ lệ hoàn thành mục tiêu học tập</span>
-                <span id="progressBarLabel">0%</span>
-              </div>
-              <div class="w-full bg-stone-200 dark:bg-stone-800 h-3.5 rounded-full overflow-hidden">
-                <div id="progressBar" class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-              </div>
+        <!-- Progress Overview -->
+        <div class="bg-white dark:bg-stone-900 p-6 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 space-y-4">
+          <h3 class="text-lg font-bold text-stone-800 dark:text-stone-100 font-vietnamese">
+            Tiến độ Ghi nhớ Thành ngữ
+          </h3>
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1 text-stone-600 dark:text-stone-400">
+              <span>Tỷ lệ thuộc toàn bộ chủ đề</span>
+              <span id="statOverallPercent">0%</span>
             </div>
-            <hr class="border-stone-100 dark:border-stone-800 my-4" />
-            <div class="space-y-3">
-              <h4 class="text-sm font-bold text-stone-700 dark:text-stone-300">Chi tiết Tiến trình theo Chủ đề:</h4>
-              <div id="themeProgressDetails" class="space-y-2">
-                <!-- Programmatically populated theme breakdowns -->
-              </div>
+            <div class="w-full bg-stone-200 dark:bg-stone-800 h-3.5 rounded-full overflow-hidden">
+              <div id="statOverallProgressBar" class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <hr class="border-stone-100 dark:border-stone-800 my-4" />
+
+          <div class="space-y-3">
+            <h4 class="text-sm font-bold text-stone-700 dark:text-stone-300 font-vietnamese">Chi tiết theo từng Chủ đề:</h4>
+            <div id="dashboardThemeBreakdown" class="space-y-2">
+              <!-- Rendered via JS -->
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="bg-stone-100 dark:bg-stone-900/60 p-5 rounded-xl border border-stone-200 dark:border-stone-800 text-sm">
-          <h4 class="font-bold flex items-center space-x-2 text-stone-800 dark:text-stone-100 mb-2">
-            <i data-lucide="info" class="w-4 h-4 text-amber-700"></i>
-            <span>Cú pháp tạo Pinyin thông minh trên đầu chữ Hán (Ruby Markup)</span>
-          </h4>
-          <p class="text-stone-600 dark:text-stone-300 leading-relaxed text-xs">
-            Khi biên tập thủ công hoặc nhập danh sách bằng file CSV, bạn có thể tạo chữ kèm phiên âm theo cú pháp: 
-            <strong class="text-rose-700 dark:text-amber-400 mx-1">Chữ_Hán{pinyin}</strong>.
-            Ví dụ: <code class="bg-stone-200 dark:bg-stone-800 px-1 py-0.5 rounded text-amber-800 dark:text-amber-200">学{xué}习{xí}</code> sẽ hiển thị chữ 學 và 習 có phiên âm kèm dấu sắc trực quan ngay bên trên.
-          </p>
-        </div>
-      </section>
-
-      <!-- TAB 2: IDIOM FLASHCARDS -->
-      <section id="tabIdioms" class="hidden max-w-4xl mx-auto space-y-6">
+      <!-- IDIOMS NOTEBOOK VIEW -->
+      <div id="idiomsView" class="max-w-4xl mx-auto space-y-6">
+        <!-- Top Controls -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 class="text-xl md:text-2xl font-bold text-stone-800 dark:text-stone-100">Sổ Tay Thành Ngữ (成语册)</h2>
-            <p class="text-xs text-stone-500">Chủ đề: <span id="currentThemeLabel" class="font-bold text-stone-800 dark:text-stone-300">-</span></p>
+            <h2 class="text-xl md:text-2xl font-bold text-stone-800 dark:text-stone-100 font-vietnamese">
+              Sổ Tay Thành Ngữ (成语册)
+            </h2>
+            <p class="text-xs text-stone-500 font-vietnamese">
+              Chủ đề: <span id="currentActiveThemeName" class="font-bold text-stone-800 dark:text-stone-300">--</span>
+            </p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs text-stone-500 font-semibold">Lọc trạng thái:</span>
+            <span class="text-xs text-stone-500 font-semibold font-vietnamese">Lọc thẻ:</span>
             <div class="bg-stone-200 dark:bg-stone-800 p-0.5 rounded-lg flex space-x-1">
-              <button id="filterAll" class="text-[11px] font-bold py-1 px-2.5 rounded-md transition-all bg-amber-700 text-white">Tất cả</button>
-              <button id="filterUnmastered" class="text-[11px] font-bold py-1 px-2.5 rounded-md transition-all text-stone-600 dark:text-stone-400 hover:text-stone-800">Chưa thuộc</button>
-              <button id="filterMastered" class="text-[11px] font-bold py-1 px-2.5 rounded-md transition-all text-stone-600 dark:text-stone-400 hover:text-stone-800">Đã thuộc</button>
+              <button id="filterAllBtn" class="text-[11px] font-bold py-1 px-2.5 rounded-md font-vietnamese transition-all bg-amber-700 text-white">
+                Tất cả (<span id="countAllFilter">0</span>)
+              </button>
+              <button id="filterUnmasteredBtn" class="text-[11px] font-bold py-1 px-2.5 rounded-md font-vietnamese transition-all text-stone-600 dark:text-stone-400 hover:text-stone-800">
+                Chưa thuộc (<span id="countUnmasteredFilter">0</span>)
+              </button>
+              <button id="filterMasteredBtn" class="text-[11px] font-bold py-1 px-2.5 rounded-md font-vietnamese transition-all text-stone-600 dark:text-stone-400 hover:text-stone-800">
+                Đã thuộc (<span id="countMasteredFilter">0</span>)
+              </button>
             </div>
 
-            <button id="addCardBtn" class="hidden bg-amber-800 hover:bg-amber-900 text-white py-1.5 px-3 rounded-lg text-xs font-semibold items-center space-x-1">
-              <i data-lucide="plus" class="w-4 h-4"></i>
+            <button id="addNewCardBtn" class="bg-amber-800 hover:bg-amber-900 text-white py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center space-x-1 font-vietnamese hidden">
+              <i class="fa-solid fa-plus"></i>
               <span>Thêm Thẻ</span>
             </button>
           </div>
         </div>
 
-        <!-- IDIOMS DECK ELEMENT -->
-        <div id="flashcardDeckContainer" class="space-y-6">
-          <div class="flex justify-between items-center text-xs text-stone-500 font-semibold bg-stone-100 dark:bg-stone-900 px-3 py-1.5 rounded-md border border-stone-200 dark:border-stone-800">
+        <!-- Flashcard Viewport -->
+        <div id="flashcardSection" class="space-y-6">
+          <!-- Outer status bar -->
+          <div class="flex justify-between items-center text-xs text-stone-500 font-semibold font-vietnamese bg-stone-100 dark:bg-stone-900 px-3 py-1.5 rounded-md border border-stone-200 dark:border-stone-800">
             <div class="flex items-center space-x-2">
-              <span id="cardNavLabel">Thẻ 0 / 0</span>
+              <span>Thẻ <span id="currentCardIndexDisplay">0</span> / <span id="totalCardsDisplay">0</span></span>
               <span class="w-1.5 h-1.5 rounded-full bg-stone-300"></span>
-              <span id="cardSttLabel">STT gốc: 0</span>
+              <span>STT gốc: <span id="cardOriginalSttDisplay">0</span></span>
             </div>
-            <div>
-              <span id="cardMasteryIndicator" class="text-amber-700 dark:text-amber-500 font-bold">Chưa thuộc</span>
+            <div id="cardMasteredBadge">
+              <!-- Rendered via JS -->
             </div>
           </div>
 
-          <!-- FLIP CARD INTERACTIVE COMPONENT -->
-          <div id="flashcardElement" class="cursor-pointer group relative perspective-1000 h-[380px] md:h-[420px] w-full select-none">
+          <!-- 3D FLIP CARD CONTAINER -->
+          <div id="flashcard3DContainer" class="cursor-pointer group relative perspective-1000 h-[380px] md:h-[420px] w-full select-none">
             <div id="flashcardInner" class="relative preserve-3d w-full h-full duration-500">
               
-              <!-- CARD FRONT -->
-              <div id="cardFront" class="absolute inset-0 backface-hidden w-full h-full bg-stone-100 dark:bg-stone-900 rounded-3xl p-6 md:p-10 flex flex-col justify-between border-2 border-amber-800/20 dark:border-stone-800 shadow-xl transition-all duration-300">
-                <div class="absolute top-4 right-6 text-[10px] uppercase font-mono tracking-wider text-amber-900/30 dark:text-stone-500 select-none">Mặt Trước</div>
-                <div class="absolute inset-x-0 bottom-4 text-center text-[10px] text-stone-400 select-none">Chạm nhẹ hoặc nhấp chuột để lật thẻ</div>
-                
+              <!-- FRONT OF CARD -->
+              <div class="card-front absolute inset-0 backface-hidden w-full h-full bg-stone-100 dark:bg-stone-900 rounded-3xl p-6 md:p-10 flex flex-col justify-between border-2 border-amber-800/20 dark:border-stone-800 shadow-xl">
+                <div class="absolute top-4 right-6 text-[10px] uppercase font-mono tracking-wider text-amber-900/30 dark:text-stone-500">
+                  Front • TRƯỚC
+                </div>
                 <div class="flex justify-between items-start">
-                  <div id="frontSttBubble" class="w-8 h-8 rounded-full border border-amber-800/30 flex items-center justify-center font-mono text-xs font-bold text-amber-800 dark:text-amber-400">0</div>
-                  <button id="quickDeleteCardBtn" class="hidden p-1 rounded bg-stone-200 dark:bg-stone-800 text-rose-600 hover:bg-rose-50 transition-colors" title="Xóa thẻ này">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  <div id="frontCardSttCircle" class="w-8 h-8 rounded-full border border-amber-800/30 flex items-center justify-center font-mono text-xs font-bold text-amber-800 dark:text-amber-400">
+                    1
+                  </div>
+                  <button id="quickDeleteCardBtn" class="p-1 rounded bg-stone-200 dark:bg-stone-800 text-rose-600 hover:bg-rose-50 transition-colors hidden" title="Xóa nhanh thẻ này">
+                    <i class="fa-solid fa-trash-can"></i>
                   </button>
                 </div>
 
-                <div class="text-center space-y-4">
-                  <h1 id="cardFrontText" class="text-4xl md:text-6xl font-bold font-kaiti tracking-wider text-rose-900 dark:text-amber-100 leading-tight">-</h1>
-                  <p id="cardFrontPinyin" class="text-base md:text-xl font-sans tracking-wide text-stone-500 dark:text-stone-300 italic">-</p>
+                <div class="text-center space-y-4 my-auto">
+                  <h1 id="frontHanzi" class="text-4xl md:text-6xl font-bold font-kaiti tracking-wider text-rose-900 dark:text-amber-100 leading-tight">
+                    --
+                  </h1>
+                  <p id="frontPinyin" class="text-base md:text-xl font-sans tracking-wide text-stone-500 dark:text-stone-300 italic">
+                    [ -- ]
+                  </p>
                 </div>
-                <div class="h-8"></div>
+
+                <div class="text-center text-[10px] text-stone-400 font-vietnamese">
+                  Chạm/Click hoặc phím Cách để lật mặt sau
+                </div>
               </div>
 
-              <!-- CARD BACK -->
-              <div id="cardBack" class="absolute inset-0 backface-hidden rotate-y-180 w-full h-full bg-amber-50/10 dark:bg-stone-900 rounded-3xl p-6 md:p-8 flex flex-col justify-between border-2 border-amber-800/40 dark:border-stone-800 shadow-xl overflow-y-auto transition-all duration-300">
-                <div class="absolute top-4 right-6 text-[10px] uppercase font-mono tracking-wider text-amber-900/30 dark:text-stone-500 select-none">Mặt Sau</div>
-                
-                <div class="text-center border-b border-amber-800/20 pb-4 mt-2">
-                  <h3 class="text-xs text-amber-800 dark:text-amber-400 uppercase tracking-wider font-semibold">Nghĩa Tiếng Việt</h3>
-                  <h2 id="cardBackNghia" class="text-lg md:text-2xl font-bold text-stone-900 dark:text-white mt-1 leading-normal">-</h2>
+              <!-- BACK OF CARD -->
+              <div class="card-back absolute inset-0 backface-hidden w-full h-full bg-amber-50/10 dark:bg-stone-900 rounded-3xl p-6 md:p-8 flex flex-col justify-between border-2 border-amber-800/40 dark:border-stone-800 shadow-xl overflow-y-auto">
+                <div class="absolute top-4 right-6 text-[10px] uppercase font-mono tracking-wider text-amber-900/30 dark:text-stone-500">
+                  Back • SAU
                 </div>
 
-                <div class="flex-1 my-4 space-y-3 overflow-y-auto pr-1">
-                  <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-widest">Ví dụ minh họa & Dịch nghĩa:</h4>
-                  <div id="cardExamplesContainer" class="space-y-3">
-                    <!-- Programmatic implementation of example lists -->
+                <div class="text-center border-b border-amber-800/20 pb-3 mt-1">
+                  <h3 class="text-xs text-amber-800 dark:text-amber-400 uppercase tracking-wider font-semibold font-vietnamese">Nghĩa Tiếng Việt</h3>
+                  <h2 id="backVietMeaning" class="text-lg md:text-2xl font-bold text-stone-900 dark:text-white font-vietnamese mt-1">
+                    --
+                  </h2>
+                </div>
+
+                <!-- 3-Line Example Sentences Section -->
+                <div class="flex-1 my-3 space-y-3 overflow-y-auto pr-1">
+                  <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-widest font-vietnamese">Ví dụ minh họa & Dịch nghĩa:</h4>
+                  <div id="cardExamplesContainer" class="space-y-2.5">
+                    <!-- Dynamic rendering via JavaScript -->
                   </div>
                 </div>
 
-                <div class="text-center text-[10px] text-stone-400 select-none">Chạm nhẹ hoặc click để lật lại mặt trước</div>
+                <div class="text-center text-[10px] text-stone-400 font-vietnamese">
+                  Chạm/Click để đóng mặt trước
+                </div>
               </div>
 
             </div>
           </div>
 
-          <!-- NAVIGATION CONTROLS -->
+          <!-- BOTTOM CONTROLS -->
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-2 w-full md:w-auto">
-              <button id="markUnmastered" class="flex-1 md:flex-none flex items-center justify-center space-x-1.5 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-800 dark:text-rose-400 py-2.5 px-5 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:border-rose-900/40">
-                <i data-lucide="x" class="w-4 h-4"></i>
+              <button id="markUnmasteredBtn" class="flex-1 md:flex-none flex items-center justify-center space-x-1.5 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 text-rose-800 dark:text-rose-400 py-2.5 px-5 rounded-xl text-xs font-bold font-vietnamese transition-colors border border-rose-200 dark:border-rose-900/40">
+                <i class="fa-solid fa-xmark"></i>
                 <span>Chưa thuộc</span>
               </button>
-              <button id="markMastered" class="flex-1 md:flex-none flex items-center justify-center space-x-1.5 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 py-2.5 px-5 rounded-xl text-xs font-bold transition-all border border-emerald-200 dark:border-emerald-900/40">
-                <i data-lucide="check" class="w-4 h-4"></i>
+              <button id="markMasteredBtn" class="flex-1 md:flex-none flex items-center justify-center space-x-1.5 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-400 py-2.5 px-5 rounded-xl text-xs font-bold font-vietnamese transition-colors border border-emerald-200 dark:border-emerald-900/40">
+                <i class="fa-solid fa-check"></i>
                 <span>Đã thuộc</span>
               </button>
             </div>
 
             <div class="flex items-center space-x-2 w-full md:w-auto">
-              <button id="prevCardBtn" class="flex-1 md:flex-none flex items-center justify-center bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 disabled:opacity-40 py-2 px-4 rounded-xl text-xs font-bold transition-all">
-                <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
-                <span>Trước</span>
+              <button id="prevCardBtn" class="flex-1 md:flex-none flex items-center justify-center bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 py-2 px-4 rounded-xl text-xs font-bold font-vietnamese">
+                <i class="fa-solid fa-chevron-left mr-1"></i> Trước
               </button>
-              <button id="nextCardBtn" class="flex-1 md:flex-none flex items-center justify-center bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 disabled:opacity-40 py-2 px-4 rounded-xl text-xs font-bold transition-all">
-                <span>Sau</span>
-                <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+              <button id="nextCardBtn" class="flex-1 md:flex-none flex items-center justify-center bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 py-2 px-4 rounded-xl text-xs font-bold font-vietnamese">
+                Sau <i class="fa-solid fa-chevron-right ml-1"></i>
               </button>
             </div>
 
             <div class="flex items-center space-x-2 w-full md:w-auto">
-              <button id="shuffleBtn" class="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 text-amber-950 dark:text-amber-200 py-2 px-4 rounded-xl text-xs font-bold border border-amber-200 dark:border-amber-900/30" title="Xáo trộn trật tự">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <button id="shuffleCardsBtn" class="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 text-amber-950 dark:text-amber-200 py-2 px-4 rounded-xl text-xs font-bold font-vietnamese border border-amber-200 dark:border-amber-900/30">
+                <i class="fa-solid fa-shuffle"></i>
                 <span>Trộn ngẫu nhiên</span>
               </button>
-              <button id="resetThemeProgress" class="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 rounded-xl text-stone-500" title="Đặt lại tiến trình của chủ đề này">
-                <i data-lucide="rotate-ccw" class="w-4 h-4 text-stone-400"></i>
+              <button id="resetProgressBtn" class="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 rounded-xl text-stone-500" title="Đặt lại về chưa thuộc">
+                <i class="fa-solid fa-rotate-left"></i>
               </button>
             </div>
           </div>
 
-          <p class="text-[10px] text-center text-stone-400">
-            💡 Phím tắt trên máy tính: Nhấn <kbd class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-bold">Phím Cách (Space)</kbd> để Lật mặt thẻ, phím <kbd class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-bold">←</kbd> và <kbd class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-bold">→</kbd> để đổi thẻ.
+          <p class="text-[10px] text-center text-stone-400 font-vietnamese">
+            💡 Phím tắt PC: <kbd class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-bold">Spacebar</kbd> lật thẻ, <kbd class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-bold">←</kbd> và <kbd class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-bold">→</kbd> đổi thẻ.
           </p>
         </div>
 
-        <!-- EMPTY STATE DECK -->
-        <div id="emptyDeckState" class="hidden text-center py-16 bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6">
-          <i data-lucide="layers" class="w-12 h-12 mx-auto text-amber-800/40 mb-3"></i>
-          <h3 class="text-lg font-bold text-stone-800 dark:text-stone-200">Không có thẻ thành ngữ phù hợp!</h3>
-          <p class="text-xs text-stone-500 max-w-sm mx-auto mt-2 leading-relaxed">
-            Chủ đề này chưa có dữ liệu hoặc bộ lọc hiện tại của bạn đã loại bỏ hết thẻ. Hãy đổi bộ lọc hoặc đăng nhập Admin để nạp thêm thẻ.
+        <!-- Empty State View -->
+        <div id="emptyDeckSection" class="text-center py-16 bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 hidden">
+          <i class="fa-solid fa-box-open text-4xl text-amber-800/40 mb-3"></i>
+          <h3 class="text-lg font-bold text-stone-800 dark:text-stone-200 font-vietnamese">Không có thẻ thành ngữ phù hợp!</h3>
+          <p class="text-xs text-stone-500 font-vietnamese max-w-sm mx-auto mt-2">
+            Bộ sưu tập này chưa có dữ liệu hoặc đã được lọc hết.
           </p>
           <div class="mt-4 flex justify-center space-x-2">
-            <button id="emptyStateResetFilter" class="bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 py-1.5 px-3.5 rounded text-xs font-semibold">Bỏ lọc thẻ</button>
+            <button id="resetFilterEmptyBtn" class="bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 py-1.5 px-3.5 rounded text-xs font-semibold font-vietnamese">
+              Bỏ Lọc Thẻ
+            </button>
           </div>
         </div>
-      </section>
+
+      </div>
     </main>
   </div>
 
-  <!-- MODAL OVERLAYS -->
-
-  <!-- MODAL: ADMIN LOGIN -->
-  <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <!-- Admin Login Modal -->
+  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
     <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 dark:border-stone-800 relative">
-      <button class="modalClose absolute top-4 right-4 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
-        <i data-lucide="x" class="w-5 h-5"></i>
+      <button class="closeModalBtn absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
       </button>
-      
       <div class="text-center mb-6">
-        <i data-lucide="lock" class="w-10 h-10 text-amber-700 mx-auto mb-2"></i>
-        <h3 class="text-lg font-bold text-stone-800 dark:text-stone-100">Đăng nhập Quản trị viên</h3>
-        <p class="text-xs text-stone-500">Nhập tài khoản quản trị được cấp để mở khóa tính năng biên dịch.</p>
+        <i class="fa-solid fa-lock text-3xl text-amber-700 mb-2"></i>
+        <h3 class="text-lg font-bold text-stone-800 dark:text-stone-100 font-vietnamese">Đăng nhập Quản trị viên</h3>
+        <p class="text-xs text-stone-500 font-vietnamese">Nhập tài khoản để cấp quyền chỉnh sửa dữ liệu.</p>
       </div>
-
-      <form id="loginForm" class="space-y-4">
+      <form id="loginForm" class="space-y-4 font-vietnamese">
         <div>
           <label class="block text-xs font-bold text-stone-600 dark:text-stone-400 mb-1">Tài khoản</label>
-          <input type="text" id="loginUsername" placeholder="Nhập tài khoản..." class="w-full p-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent" autocomplete="off" required />
+          <input type="text" id="loginUsername" placeholder="Nhập tài khoản..." autocomplete="off" required class="w-full p-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent text-stone-900 dark:text-stone-100" />
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-600 dark:text-stone-400 mb-1">Mật khẩu</label>
-          <input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." class="w-full p-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent" autocomplete="new-password" required />
+          <input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." autocomplete="new-password" required class="w-full p-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent text-stone-900 dark:text-stone-100" />
         </div>
-        <div id="loginErrorMessage" class="hidden p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs flex items-center space-x-1.5 font-semibold animate-shake">
-          <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
-          <span id="loginErrorText">Sai thông tin đăng nhập!</span>
-        </div>
-        <button type="submit" class="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition-colors">Xác thực quyền hạn</button>
+        <div id="loginErrMsg" class="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs font-semibold hidden"></div>
+        <button type="submit" class="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs uppercase tracking-wider">
+          Xác thực Ngay
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: ADD THEME -->
-  <div id="addThemeModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <!-- Add Theme Modal -->
+  <div id="addThemeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
     <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 dark:border-stone-800 relative">
-      <button class="modalClose absolute top-4 right-4 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
-        <i data-lucide="x" class="w-5 h-5"></i>
+      <button class="closeModalBtn absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
       </button>
-
-      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100 mb-2">Khởi Tạo Chủ Đề Mới</h3>
-      <p class="text-xs text-stone-500 mb-4">Các bộ sưu tập mới sẽ xuất hiện trực quan trên thanh Menu bên trái.</p>
-
-      <form id="addThemeForm" class="space-y-4">
+      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100 font-vietnamese mb-2">Tạo Chủ Đề Mới</h3>
+      <form id="addThemeForm" class="space-y-4 font-vietnamese">
         <div>
           <label class="block text-xs font-bold text-stone-600 dark:text-stone-400 mb-1">Tên chủ đề mới</label>
-          <input type="text" id="newThemeName" placeholder="Ví dụ: Thành ngữ đời sống..." class="w-full p-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:ring-1 focus:ring-amber-600" required />
+          <input type="text" id="newThemeNameInput" placeholder="Ví dụ: Thành ngữ Giao tiếp..." required class="w-full p-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent text-stone-900 dark:text-stone-100" />
         </div>
-        <button type="submit" class="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs">Tạo mới</button>
+        <button type="submit" class="w-full py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs">
+          Khởi Tạo Chủ Đề
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: ADD CARD -->
-  <div id="addCardModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+  <!-- Add Card Modal with AI Pinyin Button -->
+  <div id="addCardModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden overflow-y-auto">
     <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 dark:border-stone-800 relative my-8">
-      <button class="modalClose absolute top-4 right-4 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
-        <i data-lucide="x" class="w-5 h-5"></i>
+      <button class="closeModalBtn absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
       </button>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-base font-bold text-stone-800 dark:text-stone-100 font-vietnamese">Thêm Thẻ Thành Ngữ</h3>
+        <button type="button" onclick="autoGeneratePinyin()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold py-1.5 px-3 rounded-lg shadow transition-all flex items-center space-x-1">
+          <span>🪄 AI Lấy Pinyin Tự Động</span>
+        </button>
+      </div>
 
-      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100 mb-2">Thêm Thẻ Thành Ngữ</h3>
-      <p class="text-xs text-stone-500 mb-4">Thiết lập dữ liệu học tập cho chủ đề hiện hoạt.</p>
-
-      <form id="addCardForm" class="space-y-3 text-xs h-[450px] overflow-y-auto pr-1">
+      <form id="addCardForm" class="space-y-3 font-vietnamese text-xs max-h-[70vh] overflow-y-auto pr-1">
         <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">STT (Tùy chọn)</label>
-            <input type="number" id="newCardStt" placeholder="Tự động" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded" />
+            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">STT</label>
+            <input type="number" id="newCardStt" placeholder="Tự động" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded text-stone-900 dark:text-stone-100" />
           </div>
           <div class="col-span-2">
-            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">Thành ngữ (Hán Tự) *</label>
-            <input type="text" id="newCardTiengTrung" placeholder="Ví dụ: 半途而废" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti font-bold text-sm" required />
+            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">Tiếng Trung (Thành ngữ) *</label>
+            <input type="text" id="newCardTiengTrung" required placeholder="半途而废" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti text-sm text-stone-900 dark:text-stone-100" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">Phiên Âm (Pinyin) *</label>
-            <input type="text" id="newCardPinyin" placeholder="bàn tú ér fèi" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-mono" required />
+            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">Pinyin Thành Ngữ *</label>
+            <input type="text" id="newCardPinyin" required placeholder="bàn tú ér fèi" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded text-stone-900 dark:text-stone-100" />
           </div>
           <div>
-            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">Dịch nghĩa tiếng Việt *</label>
-            <input type="text" id="newCardNghia" placeholder="Bỏ dở nửa chừng" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded" required />
+            <label class="block font-semibold text-stone-600 dark:text-stone-400 mb-1">Nghĩa tiếng Việt *</label>
+            <input type="text" id="newCardNghia" required placeholder="Bỏ dở nửa chừng" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded text-stone-900 dark:text-stone-100" />
           </div>
         </div>
 
-        <div class="border-t border-stone-200 dark:border-stone-800 pt-3 space-y-2">
-          <span class="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Câu ví dụ mẫu kèm Pinyin</span>
+        <div class="border-t border-stone-200 dark:border-stone-800 pt-3 space-y-3">
+          <span class="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Các ví dụ minh họa</span>
           
-          <div class="space-y-1">
-            <label class="block font-semibold text-stone-600 dark:text-stone-400">Ví dụ 1 (Định dạng Hán&#123;pinyin&#125;)</label>
-            <input type="text" id="newCardVd1" placeholder="学{xué}习{xí}不{bù}能{néng}半{bàn}途{tú}er{ér}fèi{fèi}。" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti" />
-            <input type="text" id="newCardNghia1" placeholder="Dịch nghĩa Việt ví dụ 1" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded" />
+          <!-- Example 1 -->
+          <div class="space-y-1.5 p-2 bg-stone-50 dark:bg-stone-950 rounded border border-stone-200 dark:border-stone-800">
+            <label class="block font-semibold text-stone-700 dark:text-stone-300">Ví dụ 1 (Tiếng Trung)</label>
+            <input type="text" id="newCardVd1" placeholder="学习不能半途而废。" class="w-full p-1.5 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti text-stone-900 dark:text-stone-100" />
+            <input type="text" id="newCardPinyin1" placeholder="Pinyin Ví dụ 1 (AI tự tạo hoặc tự nhập)" class="w-full p-1.5 border border-blue-200 dark:border-blue-900/40 bg-blue-50/20 text-blue-700 dark:text-blue-400 rounded font-mono text-[11px]" />
+            <input type="text" id="newCardNghia1" placeholder="Dịch nghĩa Việt của ví dụ 1" class="w-full p-1.5 border border-stone-300 dark:border-stone-700 bg-transparent rounded text-stone-900 dark:text-stone-100" />
           </div>
 
-          <div class="space-y-1">
-            <label class="block font-semibold text-stone-600 dark:text-stone-400">Ví dụ 2</label>
-            <input type="text" id="newCardVd2" placeholder="做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}。" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti" />
-            <input type="text" id="newCardNghia2" placeholder="Dịch nghĩa Việt ví dụ 2" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded" />
+          <!-- Example 2 -->
+          <div class="space-y-1.5 p-2 bg-stone-50 dark:bg-stone-950 rounded border border-stone-200 dark:border-stone-800">
+            <label class="block font-semibold text-stone-700 dark:text-stone-300">Ví dụ 2 (Tiếng Trung)</label>
+            <input type="text" id="newCardVd2" placeholder="做事有始有终。" class="w-full p-1.5 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti text-stone-900 dark:text-stone-100" />
+            <input type="text" id="newCardPinyin2" placeholder="Pinyin Ví dụ 2" class="w-full p-1.5 border border-blue-200 dark:border-blue-900/40 bg-blue-50/20 text-blue-700 dark:text-blue-400 rounded font-mono text-[11px]" />
+            <input type="text" id="newCardNghia2" placeholder="Dịch nghĩa Việt của ví dụ 2" class="w-full p-1.5 border border-stone-300 dark:border-stone-700 bg-transparent rounded text-stone-900 dark:text-stone-100" />
           </div>
 
-          <div class="space-y-1">
-            <label class="block font-semibold text-stone-600 dark:text-stone-400">Ví dụ 3</label>
-            <input type="text" id="newCardVd3" placeholder="他{tā}因{yīn}为{wèi}资{zī}金{jīn}不{bù}足{zú}。" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti" />
-            <input type="text" id="newCardNghia3" placeholder="Dịch nghĩa Việt ví dụ 3" class="w-full p-2 border border-stone-300 dark:border-stone-700 bg-transparent rounded" />
+          <!-- Example 3 -->
+          <div class="space-y-1.5 p-2 bg-stone-50 dark:bg-stone-950 rounded border border-stone-200 dark:border-stone-800">
+            <label class="block font-semibold text-stone-700 dark:text-stone-300">Ví dụ 3 (Tiếng Trung)</label>
+            <input type="text" id="newCardVd3" placeholder="他因为资金不足。" class="w-full p-1.5 border border-stone-300 dark:border-stone-700 bg-transparent rounded font-kaiti text-stone-900 dark:text-stone-100" />
+            <input type="text" id="newCardPinyin3" placeholder="Pinyin Ví dụ 3" class="w-full p-1.5 border border-blue-200 dark:border-blue-900/40 bg-blue-50/20 text-blue-700 dark:text-blue-400 rounded font-mono text-[11px]" />
+            <input type="text" id="newCardNghia3" placeholder="Dịch nghĩa Việt của ví dụ 3" class="w-full p-1.5 border border-stone-300 dark:border-stone-700 bg-transparent rounded text-stone-900 dark:text-stone-100" />
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs mt-3">Xác nhận thêm</button>
+        <button type="submit" class="w-full py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs mt-2">
+          Xác Nhận Tạo Thẻ
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- CUSTOM ALERT BOX -->
-  <div id="customAlert" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-    <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 dark:border-stone-800 text-center">
-      <i data-lucide="info" class="w-12 h-12 text-amber-700 mx-auto mb-3"></i>
-      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100">Thông báo</h3>
-      <p id="customAlertMsg" class="text-xs text-stone-600 dark:text-stone-400 my-4 leading-relaxed">-</p>
-      <button id="customAlertClose" class="w-full py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-bold uppercase tracking-wider">Đóng</button>
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center border border-stone-200 dark:border-stone-800">
+      <i class="fa-solid fa-circle-info text-3xl text-amber-700 mb-2"></i>
+      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100 font-vietnamese mb-2">Thông báo</h3>
+      <p id="customAlertMsg" class="text-xs text-stone-600 dark:text-stone-400 mb-6 whitespace-pre-line leading-relaxed font-vietnamese"></p>
+      <button onclick="closeCustomAlert()" class="w-full py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg text-xs uppercase">
+        Đóng lại
+      </button>
     </div>
   </div>
 
-  <!-- CUSTOM CONFIRMATION OVERLAY -->
-  <div id="customConfirm" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-    <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 dark:border-stone-800 text-center">
-      <i data-lucide="alert-circle" class="w-12 h-12 text-rose-600 mx-auto mb-3"></i>
-      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100">Xác nhận thao tác</h3>
-      <p id="customConfirmMsg" class="text-xs text-stone-600 dark:text-stone-400 my-4 leading-relaxed">-</p>
+  <!-- Custom Confirm Modal -->
+  <div id="customConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-white dark:bg-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center border border-stone-200 dark:border-stone-800">
+      <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-600 mb-2"></i>
+      <h3 class="text-base font-bold text-stone-800 dark:text-stone-100 font-vietnamese mb-2">Xác nhận</h3>
+      <p id="customConfirmMsg" class="text-xs text-stone-600 dark:text-stone-400 mb-6 leading-relaxed font-vietnamese"></p>
       <div class="flex space-x-3">
-        <button id="customConfirmCancel" class="flex-1 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-lg text-xs font-semibold">Hủy bỏ</button>
-        <button id="customConfirmOk" class="flex-1 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-lg text-xs font-semibold">Đồng ý</button>
+        <button id="customConfirmCancelBtn" class="flex-1 py-2 bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-lg text-xs font-bold">Hủy bỏ</button>
+        <button id="customConfirmOkBtn" class="flex-1 py-2 bg-rose-700 text-white rounded-lg text-xs font-bold">Đồng ý</button>
       </div>
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC CLIENT ENGINE -->
   <script>
+    // --- Initial Seed Data ---
     const DEFAULT_SEED_DATA = {
       "Thành ngữ thông dụng": [
         {
@@ -541,11 +578,14 @@
           tiengTrung: "半途而废",
           pinyin: "bàn tú ér fèi",
           nghia: "Bỏ dở nửa chừng",
-          vd1: "学{xué}习{xí}不{bù}能{néng}半{bàn}途{tú}er{ér}fèi{fèi}。",
+          vd1: "学习不能半途而废。",
+          pinyin1: "xué xí bù néng bàn tú ér fèi.",
           nghia1: "Học tập không thể bỏ dở nửa chừng.",
-          vd2: "做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}，不{bù}应{yīng}该{gāi}半{bàn}tú{tú}er{ér}fèi{fèi}。",
+          vd2: "做事有始有终，不应该半途而废。",
+          pinyin2: "zuò shì yǒu shǐ yǒu zhōng, bù yīng gāi bàn tú ér fèi.",
           nghia2: "Làm việc phải có đầu có đuôi, không nên bỏ dở nửa chừng.",
-          vd3: "他{tā}因{yīn}为{wèi}资{zī}金{jīn}不{bù}足{zú}，项{xiàng}mù{mù}半{bàn}tú{tú}er{ér}fèi{fèi}了{le}。",
+          vd3: "他因为资金不足，项目半途而废了。",
+          pinyin3: "tā yīn wèi zī jīn bù zú, xiàng mù bàn tú ér fèi le.",
           nghia3: "Anh ấy vì thiếu kinh phí nên dự án đã phải bỏ dở giữa chừng."
         },
         {
@@ -553,303 +593,68 @@
           tiengTrung: "入乡随俗",
           pinyin: "rù xiāng suí sú",
           nghia: "Nhập gia tùy tục",
-          vd1: "去{qù}别{bié}国{guó}旅{lǚ}you{yóu}要{yào}入{rù}乡{xiāng}随{suí}sú{sú}。",
+          vd1: "去别国旅游要入乡随俗。",
+          pinyin1: "qù bié guó lǚ yóu yào rù xiāng suí sú.",
           nghia1: "Đi du lịch nước khác cần phải nhập gia tùy tục.",
-          vd2: "到{dào}了{le}xin{xīn}环{huán}境{jìng}，就{jiù}得{děi}入{rù}乡{xiāng}随{suí}sú{sú}。",
+          vd2: "到了新环境，就得入乡随俗。",
+          pinyin2: "dào le xīn huán jìng, jiù děi rù xiāng suí sú.",
           nghia2: "Đến môi trường mới thì phải nhập gia tùy tục.",
-          vd3: "入{rù}乡{xiāng}随{suí}sú{sú}是{shì}一{yī}种{zhǒng}尊{zūn}重{zhòng}。",
+          vd3: "入乡随俗是一种尊重。",
+          pinyin3: "rù xiāng suí sú shì yī zhǒng zūn zhòng.",
           nghia3: "Nhập gia tùy tục là một sự tôn trọng."
-        },
-        {
-          stt: 3,
-          tiengTrung: "一心一意",
-          pinyin: "yī xīn yī yì",
-          nghia: "Một lòng một dạ (toàn tâm toàn ý)",
-          vd1: "他{tā}一{yī}心{xīn}一{yī}yi{yì}地{de}想{xiǎng}把{bǎ}hàn{hàn}语{yǔ}学{xué}好{hǎo}。",
-          nghia1: "Anh ấy toàn tâm toàn ý muốn học tốt tiếng Trung.",
-          vd2: "只{zhǐ}有{yǒu}一{yī}心{xīn}一{yī}yi{yì}，才{cái}能{néng}取{qǔ}得{dé}好{hǎo}chéng{chéng}绩{jī}。",
-          nghia2: "Chỉ có một lòng một dạ mới có thể đạt thành tích tốt.",
-          vd3: "对{duì}待{dài}gōng{gōng}作{zuò}必{bì}sĩ{xū}一{yī}心{xīn}一{yī}yi{yì}。",
-          nghia3: "Đối với công việc phải hết lòng hết sức."
-        }
-      ],
-      "Thành ngữ Triết lý": [
-        {
-          stt: 1,
-          tiengTrung: "温故知新",
-          pinyin: "wēn gù zhī xīn",
-          nghia: "Ôn cũ biết mới",
-          vd1: "温{wēn}故{gù}而{ér}zhi{zhī}xin{xīn}，可{kě}以{yǐ}为{wéi}shī{shī}矣{yǐ}。",
-          nghia1: "Ôn lại chuyện cũ mà biết thêm chuyện mới, có thể làm thầy được rồi.",
-          vd2: "常{cháng}常{cháng}复{fù}xi{xí}，温{wēn}gù{gù}zhi{zhī}xin{xīn}。",
-          nghia2: "Thường xuyên ôn tập, để ôn cũ biết mới.",
-          vd3: "这{zhè}是{shì}一{yī}个{gè}温{wēn}gù{gù}zhi{zhī}xin{xīn}的{de}好{hǎo}ji{jī}会{huì}。",
-          nghia3: "Đây là một cơ hội tốt để ôn cũ biết mới."
         }
       ]
     };
 
+    // --- State Variables ---
     const state = {
       isAdmin: false,
-      activeTab: 'dashboard',
+      activeTab: 'idioms', // 'dashboard' | 'idioms'
       idiomDecks: {},
-      activeIdiomTheme: '',
+      activeIdiomTheme: "",
       currentCardIndex: 0,
       isFlipped: false,
       masteredCards: {},
-      filterMode: 'all',
-      serverActive: false,
-      touchStartX: 0,
-      touchStartY: 0
+      filterMode: 'all', // 'all' | 'unmastered' | 'mastered'
+      serverActive: false
     };
 
     let confirmCallback = null;
 
-    function renderApp() {
-      if (state.activeTab === 'dashboard') {
-        document.getElementById('tabDashboard').classList.remove('hidden');
-        document.getElementById('tabIdioms').classList.add('hidden');
-        document.getElementById('navDashboard').className = "w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-amber-100/60 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 font-bold border-l-4 border-amber-700";
-        document.getElementById('navIdioms').className = "w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-800";
-        updateDashboardView();
+    // --- Modal Alerts ---
+    function showAlert(msg) {
+      document.getElementById('customAlertMsg').innerText = msg;
+      document.getElementById('customAlertModal').classList.remove('hidden');
+    }
+    function closeCustomAlert() {
+      document.getElementById('customAlertModal').classList.add('hidden');
+    }
+    function showConfirm(msg, callback) {
+      document.getElementById('customConfirmMsg').innerText = msg;
+      confirmCallback = callback;
+      document.getElementById('customConfirmModal').classList.remove('hidden');
+    }
+
+    // --- LocalStorage & Persistence ---
+    function loadState() {
+      const savedAdmin = localStorage.getItem('zh_is_admin');
+      if (savedAdmin === 'true') state.isAdmin = true;
+
+      const savedDecks = localStorage.getItem('zh_idiom_decks');
+      if (savedDecks) {
+        state.idiomDecks = JSON.parse(savedDecks);
       } else {
-        document.getElementById('tabDashboard').classList.add('hidden');
-        document.getElementById('tabIdioms').classList.remove('hidden');
-        document.getElementById('navDashboard').className = "w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-800";
-        document.getElementById('navIdioms').className = "w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-amber-100/60 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 font-bold border-l-4 border-amber-700";
-        updateIdiomsDeckView();
+        state.idiomDecks = DEFAULT_SEED_DATA;
+        localStorage.setItem('zh_idiom_decks', JSON.stringify(DEFAULT_SEED_DATA));
       }
 
-      renderThemesInSidebar();
-
-      if (state.isAdmin) {
-        document.getElementById('adminIndicator').classList.remove('hidden');
-        document.getElementById('adminIndicator').classList.add('flex');
-        document.getElementById('loginModalOpen').classList.add('hidden');
-        document.getElementById('addThemeBtn').classList.remove('hidden');
-        document.getElementById('addCardBtn').classList.remove('hidden');
-        document.getElementById('quickDeleteCardBtn').classList.remove('hidden');
-        document.getElementById('adminCsvBox').classList.remove('hidden');
-      } else {
-        document.getElementById('adminIndicator').classList.add('hidden');
-        document.getElementById('adminIndicator').classList.remove('flex');
-        document.getElementById('loginModalOpen').classList.remove('hidden');
-        document.getElementById('addThemeBtn').classList.add('hidden');
-        document.getElementById('addCardBtn').classList.add('hidden');
-        document.getElementById('quickDeleteCardBtn').classList.add('hidden');
-        document.getElementById('adminCsvBox').classList.add('hidden');
+      const savedMastered = localStorage.getItem('zh_mastered_cards');
+      if (savedMastered) {
+        state.masteredCards = JSON.parse(savedMastered);
       }
 
-      lucide.createIcons();
-    }
-
-    function renderRubyMarkup(text) {
-      if (!text) return '';
-      const regex = /([^\x00-\x7F])\{([^}]+)\}/g;
-      let parts = '';
-      let lastIndex = 0;
-      let match;
-      while ((match = regex.exec(text)) !== null) {
-        if (match.index > lastIndex) {
-          parts += `<span class="text-stone-700 dark:text-stone-300 mx-0.5">${text.substring(lastIndex, match.index)}</span>`;
-        }
-        parts += `
-          <ruby class="mx-1 my-1.5 inline-flex flex-col items-center">
-            <span class="font-kaiti text-2xl md:text-3xl font-semibold text-stone-900 dark:text-amber-100">${match[1]}</span>
-            <rt class="text-[10px] md:text-xs font-sans tracking-tight text-rose-800 dark:text-amber-400 select-none pb-0.5 uppercase font-medium">${match[2]}</rt>
-          </ruby>
-        `;
-        lastIndex = regex.lastIndex;
-      }
-      if (lastIndex < text.length) {
-        parts += `<span class="text-stone-700 dark:text-stone-300 mx-0.5">${text.substring(lastIndex)}</span>`;
-      }
-      return parts || `<span class="font-kaiti text-xl">${text}</span>`;
-    }
-
-    function renderThemesInSidebar() {
-      const listEl = document.getElementById('themesList');
-      listEl.innerHTML = '';
-      
-      Object.keys(state.idiomDecks).forEach(themeName => {
-        const themeCount = state.idiomDecks[themeName]?.length || 0;
-        const div = document.createElement('div');
-        div.className = "flex items-center justify-between group p-0.5";
-        
-        const isCurrent = state.activeIdiomTheme === themeName;
-        const btnClass = isCurrent 
-          ? 'flex-1 text-left py-1.5 px-3 text-xs rounded-md transition-all font-vietnamese truncate bg-stone-200 dark:bg-stone-800 text-stone-900 dark:text-white font-bold'
-          : 'flex-1 text-left py-1.5 px-3 text-xs rounded-md transition-all font-vietnamese truncate text-stone-600 dark:text-stone-400 hover:bg-stone-200/30';
-          
-        div.innerHTML = `
-          <button class="${btnClass}" onclick="selectTheme('${themeName}')">
-            ${themeName} (${themeCount})
-          </button>
-          ${state.isAdmin ? `
-            <button class="p-1 text-rose-600 hover:text-rose-800 dark:text-rose-400 rounded transition-colors ml-1 flex-shrink-0" onclick="deleteThemeTrigger('${themeName}')" title="Xóa chủ đề này">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          ` : ''}
-        `;
-        listEl.appendChild(div);
-      });
-    }
-
-    function selectTheme(themeName) {
-      state.activeIdiomTheme = themeName;
-      state.currentCardIndex = 0;
-      state.isFlipped = false;
-      state.activeTab = 'idioms';
-      renderApp();
-    }
-
-    function updateDashboardView() {
-      let total = 0;
-      let mastered = 0;
-
-      Object.keys(state.idiomDecks).forEach(theme => {
-        const cardsCount = state.idiomDecks[theme]?.length || 0;
-        total += cardsCount;
-        mastered += (state.masteredCards[theme] || []).length;
-      });
-
-      const unmastered = total - mastered;
-      const pct = total > 0 ? Math.round((mastered / total) * 100) : 0;
-
-      document.getElementById('statTotal').innerText = total;
-      document.getElementById('statMastered').innerText = mastered;
-      document.getElementById('statUnmastered').innerText = unmastered;
-      document.getElementById('progressBarLabel').innerText = `${pct}% (${mastered}/${total})`;
-      document.getElementById('progressBar').style.width = `${pct}%`;
-
-      const detailContainer = document.getElementById('themeProgressDetails');
-      detailContainer.innerHTML = '';
-      
-      Object.keys(state.idiomDecks).forEach(themeName => {
-        const themeTotal = state.idiomDecks[themeName]?.length || 0;
-        const themeMastered = (state.masteredCards[themeName] || []).length;
-        const themePct = themeTotal > 0 ? Math.round((themeMastered / themeTotal) * 100) : 0;
-        
-        const div = document.createElement('div');
-        div.className = "flex items-center justify-between text-xs bg-stone-50 dark:bg-stone-950/50 p-2.5 rounded-lg";
-        div.innerHTML = `
-          <span class="font-medium text-stone-700 dark:text-stone-300">${themeName}</span>
-          <div class="flex items-center space-x-3 w-1/2 justify-end">
-            <div class="w-24 bg-stone-200 dark:bg-stone-800 h-2 rounded-full overflow-hidden">
-              <div class="bg-amber-600 h-full" style="width: ${themePct}%"></div>
-            </div>
-            <span class="font-semibold text-stone-600 dark:text-stone-400 w-10 text-right">${themePct}%</span>
-          </div>
-        `;
-        detailContainer.appendChild(div);
-      });
-    }
-
-    function updateIdiomsDeckView() {
-      document.getElementById('currentThemeLabel').innerText = state.activeIdiomTheme || "Chưa chọn";
-      
-      const filters = ['All', 'Unmastered', 'Mastered'];
-      filters.forEach(f => {
-        const el = document.getElementById(`filter${f}`);
-        if (state.filterMode === f.toLowerCase()) {
-          el.className = "text-[11px] font-bold py-1 px-2.5 rounded-md transition-all bg-amber-700 text-white";
-        } else {
-          el.className = "text-[11px] font-bold py-1 px-2.5 rounded-md transition-all text-stone-600 dark:text-stone-400 hover:text-stone-800";
-        }
-      });
-
-      const cards = getFilteredCards();
-      const deckContainer = document.getElementById('flashcardDeckContainer');
-      const emptyState = document.getElementById('emptyDeckState');
-
-      if (cards.length === 0) {
-        deckContainer.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      deckContainer.classList.remove('hidden');
-      emptyState.classList.add('hidden');
-
-      if (state.currentCardIndex >= cards.length) {
-        state.currentCardIndex = Math.max(0, cards.length - 1);
-      }
-
-      const currentCard = cards[state.currentCardIndex];
-      const isMastered = (state.masteredCards[state.activeIdiomTheme] || []).includes(currentCard.stt);
-
-      document.getElementById('cardNavLabel').innerText = `Thẻ ${state.currentCardIndex + 1} / ${cards.length}`;
-      document.getElementById('cardSttLabel').innerText = `STT gốc: ${currentCard.stt}`;
-      
-      const masteryLabel = document.getElementById('cardMasteryIndicator');
-      if (isMastered) {
-        masteryLabel.className = "text-emerald-700 dark:text-emerald-400 font-bold flex items-center space-x-1";
-        masteryLabel.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 inline"></i><span>Đã thuộc</span>`;
-      } else {
-        masteryLabel.className = "text-amber-700 dark:text-amber-500 font-bold";
-        masteryLabel.innerText = "Chưa thuộc";
-      }
-
-      document.getElementById('frontSttBubble').innerText = currentCard.stt;
-      document.getElementById('cardFrontText').innerText = currentCard.tiengTrung;
-      document.getElementById('cardFrontPinyin').innerText = `[ ${currentCard.pinyin} ]`;
-      document.getElementById('cardBackNghia').innerText = currentCard.nghia;
-
-      const examplesContainer = document.getElementById('cardExamplesContainer');
-      examplesContainer.innerHTML = '';
-
-      const examples = [
-        { val: currentCard.vd1, translation: currentCard.nghia1 },
-        { val: currentCard.vd2, translation: currentCard.nghia2 },
-        { val: currentCard.vd3, translation: currentCard.nghia3 }
-      ];
-
-      examples.forEach(ex => {
-        if (ex.val) {
-          const div = document.createElement('div');
-          div.className = "bg-white/40 dark:bg-stone-950/40 p-2.5 rounded-lg border border-stone-200/50 dark:border-stone-800/50";
-          div.innerHTML = `
-            <div class="font-kaiti">${renderRubyMarkup(ex.val)}</div>
-            <p class="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1 pl-1 italic border-l border-amber-800/30">
-              ${ex.translation || ''}
-            </p>
-          `;
-          examplesContainer.appendChild(div);
-        }
-      });
-
-      document.getElementById('prevCardBtn').disabled = (state.currentCardIndex === 0);
-      document.getElementById('nextCardBtn').disabled = (state.currentCardIndex === cards.length - 1);
-
-      const cardInner = document.getElementById('flashcardInner');
-      const cardFront = document.getElementById('cardFront');
-      const cardBack = document.getElementById('cardBack');
-
-      if (state.isFlipped) {
-        cardInner.classList.add('rotate-y-180');
-        cardFront.style.pointerEvents = 'none';
-        cardBack.style.pointerEvents = 'auto';
-        cardFront.style.zIndex = '0';
-        cardBack.style.zIndex = '20';
-      } else {
-        cardInner.classList.remove('rotate-y-180');
-        cardFront.style.pointerEvents = 'auto';
-        cardBack.style.pointerEvents = 'none';
-        cardFront.style.zIndex = '20';
-        cardBack.style.zIndex = '0';
-      }
-    }
-
-    function getFilteredCards() {
-      const rawCards = state.idiomDecks[state.activeIdiomTheme] || [];
-      const mastered = state.masteredCards[state.activeIdiomTheme] || [];
-
-      if (state.filterMode === 'mastered') {
-        return rawCards.filter(card => mastered.includes(card.stt));
-      } else if (state.filterMode === 'unmastered') {
-        return rawCards.filter(card => !mastered.includes(card.stt));
-      }
-      return rawCards;
+      const themes = Object.keys(state.idiomDecks);
+      state.activeIdiomTheme = themes[0] || "";
     }
 
     function saveState() {
@@ -862,9 +667,26 @@
       }
     }
 
+    async function fetchInitialData() {
+      try {
+        const res = await fetch('/api/themes');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.idiomDecks && Object.keys(data.idiomDecks).length > 0) {
+            state.idiomDecks = data.idiomDecks;
+            if (data.masteredCards) state.masteredCards = data.masteredCards;
+            state.serverActive = true;
+            saveState();
+          }
+        }
+      } catch (err) {
+        state.serverActive = false;
+      }
+    }
+
     async function syncStateToServer() {
       try {
-        await fetch(`/api/themes/sync`, {
+        await fetch('/api/themes/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -872,281 +694,224 @@
             masteredCards: state.masteredCards
           })
         });
-      } catch (err) {
-        console.warn("Unable to sync in real-time with the database server:", err);
+      } catch (err) {}
+    }
+
+    // --- Helper Functions ---
+    function getFilteredCards() {
+      const rawCards = state.idiomDecks[state.activeIdiomTheme] || [];
+      const masteredList = state.masteredCards[state.activeIdiomTheme] || [];
+
+      if (state.filterMode === 'mastered') {
+        return rawCards.filter(c => masteredList.includes(c.stt));
+      } else if (state.filterMode === 'unmastered') {
+        return rawCards.filter(c => !masteredList.includes(c.stt));
+      }
+      return rawCards;
+    }
+
+    // --- Render Logic ---
+    function renderApp() {
+      // Render Header Status
+      const adminHeaderStatus = document.getElementById('adminHeaderStatus');
+      if (state.isAdmin) {
+        adminHeaderStatus.innerHTML = `
+          <div class="flex items-center space-x-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 py-1 px-3 rounded-full">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span class="text-xs font-semibold text-amber-800 dark:text-amber-300 font-vietnamese">Admin</span>
+            <button onclick="handleLogout()" class="ml-2 text-xs text-rose-700 dark:text-rose-400 hover:underline font-bold">[Đăng xuất]</button>
+          </div>
+        `;
+      } else {
+        adminHeaderStatus.innerHTML = `
+          <button onclick="openModal('loginModal')" class="flex items-center space-x-1.5 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 py-1.5 px-3.5 rounded-md text-xs font-semibold font-vietnamese border border-stone-300 dark:border-stone-700">
+            <i class="fa-solid fa-lock text-stone-600 dark:text-stone-400"></i>
+            <span>Quản trị viên</span>
+          </button>
+        `;
+      }
+
+      // Show/Hide Admin Controls
+      document.getElementById('addThemeBtn').classList.toggle('hidden', !state.isAdmin);
+      document.getElementById('addNewCardBtn').classList.toggle('hidden', !state.isAdmin);
+      document.getElementById('quickDeleteCardBtn').classList.toggle('hidden', !state.isAdmin);
+      document.getElementById('csvImportSection').classList.toggle('hidden', !state.isAdmin);
+
+      // Render Active Tab View
+      document.getElementById('dashboardView').classList.toggle('hidden', state.activeTab !== 'dashboard');
+      document.getElementById('idiomsView').classList.toggle('hidden', state.activeTab !== 'idioms');
+
+      // Update Nav Buttons Active Style
+      document.getElementById('navDashboardBtn').className = state.activeTab === 'dashboard' 
+        ? 'w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-bold bg-amber-100/60 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 border-l-4 border-amber-700'
+        : 'w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold hover:bg-stone-200/50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400';
+
+      document.getElementById('navIdiomsBtn').className = state.activeTab === 'idioms' 
+        ? 'w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-bold bg-amber-100/60 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 border-l-4 border-amber-700'
+        : 'w-full flex items-center space-x-3 py-2 px-3 rounded-lg text-sm font-semibold hover:bg-stone-200/50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400';
+
+      renderSidebarThemes();
+
+      if (state.activeTab === 'dashboard') {
+        renderDashboard();
+      } else {
+        renderCard();
       }
     }
 
-    function showAlert(msg) {
-      document.getElementById('customAlertMsg').innerText = msg;
-      document.getElementById('customAlert').classList.remove('hidden');
-      document.getElementById('customAlert').classList.add('flex');
+    function renderSidebarThemes() {
+      const container = document.getElementById('themeListContainer');
+      container.innerHTML = '';
+
+      Object.keys(state.idiomDecks).forEach(theme => {
+        const count = state.idiomDecks[theme].length;
+        const isActive = state.activeIdiomTheme === theme;
+
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between group';
+
+        div.innerHTML = `
+          <button onclick="selectTheme('${theme}')" class="flex-1 text-left py-1.5 px-3 text-xs rounded-md font-vietnamese truncate ${isActive ? 'bg-stone-200 dark:bg-stone-800 text-stone-900 dark:text-white font-bold' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/30'}">
+            ${theme} (${count})
+          </button>
+          ${state.isAdmin ? `<button onclick="deleteThemeTrigger('${theme}')" class="p-1 text-rose-600 hover:text-rose-800 rounded transition-colors ml-1" title="Xóa chủ đề này"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
+        `;
+        container.appendChild(div);
+      });
     }
 
-    function showConfirm(msg, callback) {
-      document.getElementById('customConfirmMsg').innerText = msg;
-      document.getElementById('customConfirm').classList.remove('hidden');
-      document.getElementById('customConfirm').classList.add('flex');
-      confirmCallback = callback;
+    function renderDashboard() {
+      let total = 0;
+      let mastered = 0;
+
+      const breakdown = document.getElementById('dashboardThemeBreakdown');
+      breakdown.innerHTML = '';
+
+      Object.keys(state.idiomDecks).forEach(theme => {
+        const themeTotal = state.idiomDecks[theme].length;
+        const themeMastered = (state.masteredCards[theme] || []).length;
+        total += themeTotal;
+        mastered += themeMastered;
+
+        const percent = themeTotal > 0 ? Math.round((themeMastered / themeTotal) * 100) : 0;
+
+        breakdown.innerHTML += `
+          <div class="flex items-center justify-between text-xs bg-stone-50 dark:bg-stone-950/50 p-2.5 rounded-lg">
+            <span class="font-vietnamese font-medium text-stone-700 dark:text-stone-300">${theme}</span>
+            <div class="flex items-center space-x-3 w-1/2 justify-end">
+              <div class="w-24 bg-stone-200 dark:bg-stone-800 h-2 rounded-full overflow-hidden">
+                <div class="bg-amber-600 h-full" style="width: ${percent}%"></div>
+              </div>
+              <span class="font-semibold text-stone-600 dark:text-stone-400 w-10 text-right">${percent}%</span>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('statTotalIdioms').innerText = total;
+      document.getElementById('statMasteredIdioms').innerText = mastered;
+      document.getElementById('statUnmasteredIdioms').innerText = Math.max(0, total - mastered);
+
+      const overallPercent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+      document.getElementById('statOverallPercent').innerText = `${overallPercent}% (${mastered}/${total})`;
+      document.getElementById('statOverallProgressBar').style.width = `${overallPercent}%`;
     }
 
-    function hideModals() {
-      const modals = ['loginModal', 'addThemeModal', 'addCardModal', 'customAlert', 'customConfirm'];
-      modals.forEach(id => {
-        document.getElementById(id).classList.add('hidden');
-        document.getElementById(id).classList.remove('flex');
+    function renderCard() {
+      document.getElementById('currentActiveThemeName').innerText = state.activeIdiomTheme || "Chưa chọn";
+
+      const rawCards = state.idiomDecks[state.activeIdiomTheme] || [];
+      const masteredList = state.masteredCards[state.activeIdiomTheme] || [];
+
+      document.getElementById('countAllFilter').innerText = rawCards.length;
+      document.getElementById('countUnmasteredFilter').innerText = Math.max(0, rawCards.length - masteredList.length);
+      document.getElementById('countMasteredFilter').innerText = masteredList.length;
+
+      const cards = getFilteredCards();
+
+      const cardSection = document.getElementById('flashcardSection');
+      const emptySection = document.getElementById('emptyDeckSection');
+
+      if (cards.length === 0) {
+        cardSection.classList.add('hidden');
+        emptySection.classList.remove('hidden');
+        return;
+      }
+
+      cardSection.classList.remove('hidden');
+      emptySection.classList.add('hidden');
+
+      if (state.currentCardIndex >= cards.length) {
+        state.currentCardIndex = Math.max(0, cards.length - 1);
+      }
+
+      const card = cards[state.currentCardIndex];
+
+      document.getElementById('currentCardIndexDisplay').innerText = state.currentCardIndex + 1;
+      document.getElementById('totalCardsDisplay').innerText = cards.length;
+      document.getElementById('cardOriginalSttDisplay').innerText = card.stt;
+
+      const isMastered = masteredList.includes(card.stt);
+      document.getElementById('cardMasteredBadge').innerHTML = isMastered
+        ? `<span class="text-emerald-700 dark:text-emerald-400 font-bold flex items-center space-x-1"><i class="fa-solid fa-check text-xs"></i><span>Đã thuộc</span></span>`
+        : `<span class="text-amber-700 dark:text-amber-500 font-bold">Chưa thuộc</span>`;
+
+      // Front Face
+      document.getElementById('frontCardSttCircle').innerText = card.stt;
+      document.getElementById('frontHanzi').innerText = card.tiengTrung || '';
+      document.getElementById('frontPinyin').innerText = card.pinyin ? `[ ${card.pinyin} ]` : '';
+
+      // Back Face
+      document.getElementById('backVietMeaning').innerText = card.nghia || '';
+
+      // Render 3-Line Examples
+      const exContainer = document.getElementById('cardExamplesContainer');
+      exContainer.innerHTML = '';
+
+      [1, 2, 3].forEach(num => {
+        const vd = card[`vd${num}`];
+        const py = card[`pinyin${num}`];
+        const ng = card[`nghia${num}`];
+
+        if (vd || py || ng) {
+          exContainer.innerHTML += `
+            <div class="bg-white/50 dark:bg-stone-950/50 p-2.5 rounded-lg border border-stone-200/50 dark:border-stone-800/50 space-y-1">
+              ${vd ? `<div class="font-kaiti font-bold text-base text-stone-900 dark:text-white leading-snug">${vd}</div>` : ''}
+              ${py ? `<div class="text-xs font-normal text-blue-600 dark:text-blue-400 font-vietnamese tracking-tight">${py}</div>` : ''}
+              ${ng ? `<div class="text-xs italic text-stone-500 dark:text-stone-400 font-vietnamese">${ng}</div>` : ''}
+            </div>
+          `;
+        }
       });
-      confirmCallback = null;
+
+      // 3D Flip Transform state
+      const inner = document.getElementById('flashcardInner');
+      const container3D = document.getElementById('flashcard3DContainer');
+
+      if (state.isFlipped) {
+        inner.classList.add('rotate-y-180');
+        container3D.classList.add('flipped');
+      } else {
+        inner.classList.remove('rotate-y-180');
+        container3D.classList.remove('flipped');
+      }
+
+      // Nav buttons state
+      document.getElementById('prevCardBtn').disabled = state.currentCardIndex === 0;
+      document.getElementById('nextCardBtn').disabled = state.currentCardIndex === cards.length - 1;
     }
 
-    window.addEventListener('load', async () => {
-      document.querySelectorAll('.modalClose').forEach(btn => {
-        btn.addEventListener('click', hideModals);
-      });
-
-      document.getElementById('sidebarToggle').addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-      });
-      document.getElementById('navDashboard').addEventListener('click', () => {
-        state.activeTab = 'dashboard';
-        renderApp();
-      });
-      document.getElementById('navIdioms').addEventListener('click', () => {
-        state.activeTab = 'idioms';
-        renderApp();
-      });
-
-      document.getElementById('loginModalOpen').addEventListener('click', () => {
-        document.getElementById('loginErrorMessage').classList.add('hidden');
-        document.getElementById('loginModal').classList.remove('hidden');
-        document.getElementById('loginModal').classList.add('flex');
-      });
-      document.getElementById('addThemeBtn').addEventListener('click', () => {
-        document.getElementById('addThemeModal').classList.remove('hidden');
-        document.getElementById('addThemeModal').classList.add('flex');
-      });
-      document.getElementById('addCardBtn').addEventListener('click', () => {
-        document.getElementById('addCardModal').classList.remove('hidden');
-        document.getElementById('addCardModal').classList.add('flex');
-      });
-
-      document.getElementById('loginForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const user = document.getElementById('loginUsername').value;
-        const pass = document.getElementById('loginPassword').value;
-
-        if (user === 'chunghaoky' && pass === '123456789') {
-          state.isAdmin = true;
-          saveState();
-          hideModals();
-          renderApp();
-          showAlert("Đã xác nhận thành công quyền hạn Quản trị viên.");
-        } else {
-          document.getElementById('loginErrorMessage').classList.remove('hidden');
-        }
-      });
-
-      document.getElementById('logoutBtn').addEventListener('click', () => {
-        state.isAdmin = false;
-        saveState();
-        renderApp();
-        showAlert("Đã thoát tài khoản quản trị.");
-      });
-
-      document.getElementById('addThemeForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const themeName = document.getElementById('newThemeName').value.trim();
-        if (!themeName) return;
-
-        if (state.idiomDecks[themeName]) {
-          showAlert("Chủ đề này đã tồn tại!");
-          return;
-        }
-
-        state.idiomDecks[themeName] = [];
-        state.activeIdiomTheme = themeName;
-        state.currentCardIndex = 0;
-        state.isFlipped = false;
-        
-        saveState();
-        hideModals();
-        renderApp();
-        document.getElementById('addThemeForm').reset();
-      });
-
-      document.getElementById('addCardForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const themeCards = state.idiomDecks[state.activeIdiomTheme] || [];
-        
-        const cardSttVal = document.getElementById('newCardStt').value;
-        const stt = cardSttVal ? parseInt(cardSttVal) : (themeCards.length + 1);
-
-        const newCard = {
-          stt,
-          tiengTrung: document.getElementById('newCardTiengTrung').value.trim(),
-          pinyin: document.getElementById('newCardPinyin').value.trim(),
-          nghia: document.getElementById('newCardNghia').value.trim(),
-          vd1: document.getElementById('newCardVd1').value.trim(),
-          nghia1: document.getElementById('newCardNghia1').value.trim(),
-          vd2: document.getElementById('newCardVd2').value.trim(),
-          nghia2: document.getElementById('newCardNghia2').value.trim(),
-          vd3: document.getElementById('newCardVd3').value.trim(),
-          nghia3: document.getElementById('newCardNghia3').value.trim()
-        };
-
-        themeCards.push(newCard);
-        themeCards.sort((a, b) => a.stt - b.stt);
-        
-        state.idiomDecks[state.activeIdiomTheme] = themeCards;
-        saveState();
-        hideModals();
-        renderApp();
-        document.getElementById('addCardForm').reset();
-      });
-
-      /* --- SWIPE & FLIP TOUCH ARCHITECTURE --- */
-      const fc = document.getElementById('flashcardElement');
-      let swipeOccurred = false;
-
-      fc.addEventListener('touchstart', (e) => {
-        const touch = e.touches[0];
-        state.touchStartX = touch.clientX;
-        state.touchStartY = touch.clientY;
-        swipeOccurred = false;
-      }, { passive: true });
-
-      fc.addEventListener('touchend', (e) => {
-        const touch = e.changedTouches[0];
-        const diffX = touch.clientX - state.touchStartX;
-        const diffY = touch.clientY - state.touchStartY;
-
-        if (Math.abs(diffX) > 40 && Math.abs(diffY) < 40) {
-          swipeOccurred = true;
-          if (diffX < 0) {
-            navigateNext();
-          } else {
-            navigatePrev();
-          }
-        }
-      }, { passive: true });
-
-      fc.addEventListener('click', (e) => {
-        if (swipeOccurred) {
-          swipeOccurred = false;
-          return;
-        }
-
-        if (e.target.closest('#quickDeleteCardBtn') || e.target.closest('button') || e.target.closest('a')) {
-          return;
-        }
-
-        toggleFlip();
-      });
-
-      document.getElementById('prevCardBtn').addEventListener('click', () => {
-        navigatePrev();
-      });
-
-      document.getElementById('nextCardBtn').addEventListener('click', () => {
-        navigateNext();
-      });
-
-      document.getElementById('markMastered').addEventListener('click', () => handleMarkProgress(true));
-      document.getElementById('markUnmastered').addEventListener('click', () => handleMarkProgress(false));
-
-      document.getElementById('shuffleBtn').addEventListener('click', () => {
-        const currentThemeCards = state.idiomDecks[state.activeIdiomTheme] || [];
-        if (currentThemeCards.length <= 1) return;
-
-        let shuffled = [...currentThemeCards];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        state.idiomDecks[state.activeIdiomTheme] = shuffled;
-        state.currentCardIndex = 0;
-        state.isFlipped = false;
-        renderApp();
-      });
-
-      document.getElementById('resetThemeProgress').addEventListener('click', () => {
-        showConfirm("Đặt lại trạng thái ghi nhớ của chủ đề hiện tại về 'Chưa thuộc'?", () => {
-          state.masteredCards[state.activeIdiomTheme] = [];
-          saveState();
-          state.currentCardIndex = 0;
-          state.isFlipped = false;
-          renderApp();
-        });
-      });
-
-      document.getElementById('quickDeleteCardBtn').addEventListener('click', () => {
-        const cards = getFilteredCards();
-        if (cards.length === 0) return;
-        const cardToDelete = cards[state.currentCardIndex];
-        
-        showConfirm(`Bạn có chắc muốn xóa thành ngữ "${cardToDelete.tiengTrung}" khỏi chủ đề này?`, () => {
-          const fullList = state.idiomDecks[state.activeIdiomTheme] || [];
-          const updatedList = fullList.filter(c => c.stt !== cardToDelete.stt);
-          state.idiomDecks[state.activeIdiomTheme] = updatedList;
-          
-          saveState();
-          if (state.currentCardIndex >= updatedList.length && state.currentCardIndex > 0) {
-            state.currentCardIndex = updatedList.length - 1;
-          }
-          state.isFlipped = false;
-          renderApp();
-        });
-      });
-
-      document.getElementById('filterAll').addEventListener('click', () => selectFilter('all'));
-      document.getElementById('filterUnmastered').addEventListener('click', () => selectFilter('unmastered'));
-      document.getElementById('filterMastered').addEventListener('click', () => selectFilter('mastered'));
-      document.getElementById('emptyStateResetFilter').addEventListener('click', () => selectFilter('all'));
-
-      document.getElementById('customAlertClose').addEventListener('click', hideModals);
-      document.getElementById('customConfirmCancel').addEventListener('click', hideModals);
-      document.getElementById('customConfirmOk').addEventListener('click', () => {
-        if (confirmCallback) confirmCallback();
-        hideModals();
-      });
-
-      document.getElementById('triggerCsvUpload').addEventListener('click', () => {
-        document.getElementById('csvFileInput').click();
-      });
-      document.getElementById('csvFileInput').addEventListener('change', handleCsvFileParser);
-
-      // Sự kiện bấm nút Lưu & Đồng bộ Server thủ công
-      document.getElementById('manualSyncBtn').addEventListener('click', async () => {
-        state.serverActive = true;
-        try {
-          saveState();
-          showAlert("Đã lưu và gửi toàn bộ dữ liệu lên Máy chủ / MongoDB thành công! ☁️🍃");
-        } catch (error) {
-          showAlert("Có lỗi xảy ra khi kết nối máy chủ! Vui lòng kiểm tra lại kết nối.");
-        }
-      });
-
-      document.getElementById('downloadSample').addEventListener('click', () => {
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        csvContent += "STT;Tiếng Trung;Pinyin;Nghĩa;VD China 1;Nghĩa 1;VD China 2;Nghĩa 2;VD China 3;Nghĩa 3\n";
-        csvContent += "1;半途而废;bàn tú ér fèi;Bỏ dở nửa chừng;学{xué}习{xí}不{bù}能{néng}bàn{bàn}tú{tú}er{ér}fèi{fèi}。;Học tập không thể bỏ dở nửa chừng.;做{zuò}事{shì}有{yǒu}始{shǐ}有{yǒu}终{zhōng}。;Làm việc cần có đầu có đuôi.;;\n";
-        
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "mau_thanh_ngu_hoaviet.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
-
-      await initializeDatabaseBoot();
-    });
+    // --- Interactive Operations ---
+    function selectTheme(theme) {
+      state.activeIdiomTheme = theme;
+      state.currentCardIndex = 0;
+      state.isFlipped = false;
+      renderApp();
+    }
 
     function toggleFlip() {
       state.isFlipped = !state.isFlipped;
-      updateIdiomsDeckView();
+      renderCard();
     }
 
     function navigateNext() {
@@ -1154,7 +919,7 @@
       if (state.currentCardIndex < cards.length - 1) {
         state.isFlipped = false;
         state.currentCardIndex++;
-        updateIdiomsDeckView();
+        renderCard();
       }
     }
 
@@ -1162,46 +927,211 @@
       if (state.currentCardIndex > 0) {
         state.isFlipped = false;
         state.currentCardIndex--;
-        updateIdiomsDeckView();
+        renderCard();
       }
     }
 
-    function handleMarkProgress(isMastered) {
-      const currentCards = getFilteredCards();
-      if (currentCards.length === 0) return;
-      const currentCard = currentCards[state.currentCardIndex];
-      const themeMastered = state.masteredCards[state.activeIdiomTheme] || [];
+    function markProgress(isMastered) {
+      const cards = getFilteredCards();
+      if (cards.length === 0) return;
 
-      let updatedThemeMastered;
+      const currentCard = cards[state.currentCardIndex];
+      let masteredList = state.masteredCards[state.activeIdiomTheme] || [];
+
       if (isMastered) {
-        if (!themeMastered.includes(currentCard.stt)) {
-          updatedThemeMastered = [...themeMastered, currentCard.stt];
-        } else {
-          updatedThemeMastered = themeMastered;
-        }
+        if (!masteredList.includes(currentCard.stt)) masteredList.push(currentCard.stt);
       } else {
-        updatedThemeMastered = themeMastered.filter(stt => stt !== currentCard.stt);
+        masteredList = masteredList.filter(s => s !== currentCard.stt);
       }
 
-      state.masteredCards[state.activeIdiomTheme] = updatedThemeMastered;
+      state.masteredCards[state.activeIdiomTheme] = masteredList;
       saveState();
 
-      if (state.currentCardIndex < currentCards.length - 1) {
-        setTimeout(() => {
-          state.isFlipped = false;
-          state.currentCardIndex++;
-          updateIdiomsDeckView();
-        }, 200);
-      } else {
+      if (state.currentCardIndex < cards.length - 1) {
+        state.isFlipped = false;
+        state.currentCardIndex++;
+      }
+      renderApp();
+    }
+
+    function handleShuffle() {
+      const rawCards = state.idiomDecks[state.activeIdiomTheme] || [];
+      if (rawCards.length <= 1) return;
+
+      for (let i = rawCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+      }
+
+      state.idiomDecks[state.activeIdiomTheme] = rawCards;
+      state.currentCardIndex = 0;
+      state.isFlipped = false;
+      saveState();
+      renderApp();
+    }
+
+    function resetProgress() {
+      showConfirm("Đặt lại trạng thái học của chủ đề này về 'Chưa thuộc'?", () => {
+        state.masteredCards[state.activeIdiomTheme] = [];
+        state.currentCardIndex = 0;
+        state.isFlipped = false;
+        saveState();
         renderApp();
+      });
+    }
+
+    function deleteThemeTrigger(theme) {
+      showConfirm(`Bạn có chắc chắn muốn xóa chủ đề "${theme}" không?`, () => {
+        delete state.idiomDecks[theme];
+        delete state.masteredCards[theme];
+
+        const remaining = Object.keys(state.idiomDecks);
+        state.activeIdiomTheme = remaining[0] || "";
+        state.currentCardIndex = 0;
+        state.isFlipped = false;
+
+        saveState();
+        renderApp();
+      });
+    }
+
+    function deleteCurrentCard() {
+      const cards = getFilteredCards();
+      if (cards.length === 0) return;
+
+      const card = cards[state.currentCardIndex];
+      showConfirm(`Xóa thành ngữ "${card.tiengTrung}"?`, () => {
+        state.idiomDecks[state.activeIdiomTheme] = state.idiomDecks[state.activeIdiomTheme].filter(c => c.stt !== card.stt);
+        saveState();
+        renderApp();
+      });
+    }
+
+    // --- AI Pinyin Auto Generation ---
+    async function autoGeneratePinyin() {
+      const v1 = document.getElementById('newCardVd1').value.trim();
+      const v2 = document.getElementById('newCardVd2').value.trim();
+      const v3 = document.getElementById('newCardVd3').value.trim();
+
+      const sentences = [v1, v2, v3].filter(s => s !== '');
+      if (sentences.length === 0) {
+        showAlert("Vui lòng nhập ít nhất 1 câu ví dụ tiếng Trung trước khi lấy Pinyin!");
+        return;
+      }
+
+      showAlert("🤖 AI đang tự động tạo Pinyin có dấu thanh...\nXin chờ trong giây lát!");
+
+      try {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        
+        const promptText = `Convert the following Chinese sentences to tone-marked Pinyin.
+Return a JSON array of strings in exact order corresponding to inputs.
+
+Sentences:
+${JSON.stringify([v1, v2, v3])}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "ARRAY",
+              items: { type: "STRING" }
+            }
+          }
+        };
+
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const pinyins = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || "[]");
+
+          if (pinyins[0]) document.getElementById('newCardPinyin1').value = pinyins[0];
+          if (pinyins[1]) document.getElementById('newCardPinyin2').value = pinyins[1];
+          if (pinyins[2]) document.getElementById('newCardPinyin3').value = pinyins[2];
+
+          showAlert("✨ AI đã tạo Pinyin thành công cho các ví dụ!");
+        } else {
+          showAlert("Không thể lấy Pinyin từ AI lúc này. Vui lòng tự nhập Pinyin!");
+        }
+      } catch (e) {
+        showAlert("Lỗi mạng khi gọi AI Pinyin. Vui lòng kiểm tra kết nối!");
       }
     }
 
-    function selectFilter(mode) {
-      state.filterMode = mode;
-      state.currentCardIndex = 0;
-      state.isFlipped = false;
-      updateIdiomsDeckView();
+    // --- CSV Batch Auto-Pinyin AI Processor ---
+    async function batchGeneratePinyinForCards(importedCards) {
+      const itemsToProcess = [];
+      importedCards.forEach((card, cardIdx) => {
+        [1, 2, 3].forEach(num => {
+          const vdKey = `vd${num}`;
+          const pyKey = `pinyin${num}`;
+          if (card[vdKey] && (!card[pyKey] || card[pyKey].trim() === '')) {
+            itemsToProcess.push({ cardIdx, num, text: card[vdKey].trim() });
+          }
+        });
+      });
+
+      if (itemsToProcess.length === 0) return 0;
+
+      const BATCH_SIZE = 15;
+      const totalItems = itemsToProcess.length;
+      let processedCount = 0;
+
+      for (let i = 0; i < totalItems; i += BATCH_SIZE) {
+        const batch = itemsToProcess.slice(i, i + BATCH_SIZE);
+        const sentences = batch.map(b => b.text);
+
+        const alertMsg = document.getElementById('customAlertMsg');
+        if (alertMsg) {
+          alertMsg.innerText = `🤖 AI đang tự động tạo Pinyin cho ví dụ...\nĐang xử lý: ${Math.min(i + BATCH_SIZE, totalItems)} / ${totalItems} câu.`;
+        }
+
+        try {
+          const apiKey = "";
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+          const promptText = `Convert Chinese sentences to accurate tone-marked Pinyin. Return a JSON array of strings in exact input order.
+Sentences: ${JSON.stringify(sentences)}`;
+
+          const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "ARRAY",
+                items: { type: "STRING" }
+              }
+            }
+          };
+
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (res.ok) {
+            const resData = await res.json();
+            const jsonText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (jsonText) {
+              const pinyins = JSON.parse(jsonText);
+              batch.forEach((item, index) => {
+                if (pinyins[index]) {
+                  importedCards[item.cardIdx][`pinyin${item.num}`] = pinyins[index].trim();
+                }
+              });
+              processedCount += batch.length;
+            }
+          }
+        } catch (err) {}
+      }
+      return processedCount;
     }
 
     function handleCsvFileParser(e) {
@@ -1209,7 +1139,7 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const text = event.target.result;
         const lines = text.split(/\r?\n/);
         if (lines.length < 2) {
@@ -1223,18 +1153,23 @@
           if (!line) continue;
 
           const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
-          if (cols.length >= 4) {
+          
+          if (cols.length >= 10) {
+            const is13Col = cols.length >= 13;
             importedCards.push({
               stt: parseInt(cols[0]) || i,
               tiengTrung: cols[1] || '',
               pinyin: cols[2] || '',
               nghia: cols[3] || '',
               vd1: cols[4] || '',
-              nghia1: cols[5] || '',
-              vd2: cols[6] || '',
-              nghia2: cols[7] || '',
-              vd3: cols[8] || '',
-              nghia3: cols[9] || ''
+              pinyin1: is13Col ? (cols[5] || '') : '',
+              nghia1: is13Col ? (cols[6] || '') : (cols[5] || ''),
+              vd2: is13Col ? (cols[7] || '') : (cols[6] || ''),
+              pinyin2: is13Col ? (cols[8] || '') : '',
+              nghia2: is13Col ? (cols[9] || '') : (cols[7] || ''),
+              vd3: is13Col ? (cols[10] || '') : (cols[8] || ''),
+              pinyin3: is13Col ? (cols[11] || '') : '',
+              nghia3: is13Col ? (cols[12] || '') : (cols[9] || '')
             });
           }
         }
@@ -1244,96 +1179,243 @@
           return;
         }
 
+        showAlert("📥 Đã đọc xong dữ liệu CSV.\nĐang chuẩn bị kiểm tra và tạo Pinyin tự động bằng AI...");
+
+        const pinyinCount = await batchGeneratePinyinForCards(importedCards);
+
         const fullList = state.idiomDecks[state.activeIdiomTheme] || [];
         const merged = [...fullList, ...importedCards].sort((a, b) => a.stt - b.stt);
         
         state.idiomDecks[state.activeIdiomTheme] = merged;
-        state.serverActive = true; 
         saveState();
-        
         renderApp();
-        showAlert(`Đã nhập thành công và đồng bộ ${importedCards.length} thẻ thành ngữ mới lên hệ thống!`);
+
+        showAlert(`🎉 Đã nạp thành công ${importedCards.length} thẻ thành ngữ mới!\n✨ AI đã tự động tạo Pinyin chuẩn cho ${pinyinCount} câu ví dụ.`);
       };
       reader.readAsText(file, 'UTF-8');
       e.target.value = null; 
     }
 
-    function deleteThemeTrigger(themeName) {
-      showConfirm(`Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ chủ đề thành ngữ "${themeName}" khỏi hệ thống?`, () => {
-        delete state.idiomDecks[themeName];
-        delete state.masteredCards[themeName];
-        
-        saveState();
-        const keys = Object.keys(state.idiomDecks);
-        state.activeIdiomTheme = keys[0] || '';
-        state.currentCardIndex = 0;
-        state.isFlipped = false;
-        renderApp();
-      });
+    function downloadSampleCsv() {
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+      csvContent += "STT;Tiếng Trung;Pinyin;Nghĩa;VD China 1;Pinyin 1;Nghĩa 1;VD China 2;Pinyin 2;Nghĩa 2;VD China 3;Pinyin 3;Nghĩa 3\n";
+      csvContent += "1;半途而废;bàn tú ér fèi;Bỏ dở nửa chừng;学习不能半途而废。;xué xí bù néng bàn tú ér fèi.;Học tập không thể bỏ dở nửa chừng.;做事有始有终。;zuò shì yǒu shǐ yǒu zhōng.;Làm việc cần có đầu có đuôi.;;;\n";
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "mau_thanh_ngu_hoaviet.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
-    async function initializeDatabaseBoot() {
-      try {
-        const response = await fetch('/api/themes');
-        if (response.ok) {
-          const remoteData = await response.json();
-          if (remoteData && Object.keys(remoteData).length > 0) {
-            state.idiomDecks = remoteData.idiomDecks || DEFAULT_SEED_DATA;
-            state.masteredCards = remoteData.masteredCards || {};
-            state.serverActive = true;
-            console.log("Database connection confirmed! Loaded sync values successfully.");
-          }
-        }
-      } catch (err) {
-        console.info("Stand-alone execution detected, loading direct LocalStorage values.");
-      }
+    // Modal Operations
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
 
-      if (Object.keys(state.idiomDecks).length === 0) {
-        const localIdioms = localStorage.getItem('zh_idiom_decks');
-        const localMastered = localStorage.getItem('zh_mastered_cards');
-        const localAdmin = localStorage.getItem('zh_is_admin');
-
-        if (localIdioms) {
-          state.idiomDecks = JSON.parse(localIdioms);
-        } else {
-          state.idiomDecks = DEFAULT_SEED_DATA;
-          localStorage.setItem('zh_idiom_decks', JSON.stringify(DEFAULT_SEED_DATA));
-        }
-
-        if (localMastered) {
-          state.masteredCards = JSON.parse(localMastered);
-        } else {
-          state.masteredCards = {};
-        }
-
-        if (localAdmin === 'true') {
-          state.isAdmin = true;
-        }
-      }
-
-      const keys = Object.keys(state.idiomDecks);
-      state.activeIdiomTheme = keys.includes(state.activeIdiomTheme) ? state.activeIdiomTheme : (keys[0] || '');
-      
+    function handleLogout() {
+      state.isAdmin = false;
+      saveState();
       renderApp();
     }
 
-    window.addEventListener('keydown', (e) => {
-      const modals = ['loginModal', 'addThemeModal', 'addCardModal', 'customAlert', 'customConfirm'];
-      const activeModal = modals.some(m => !document.getElementById(m).classList.contains('hidden'));
-      if (activeModal || state.activeTab !== 'idioms') return;
+    // --- DOM Event Initialization ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadState();
+      await fetchInitialData();
+      renderApp();
 
-      const cards = getFilteredCards();
-      if (cards.length === 0) return;
+      // Navigation Tab Listeners
+      document.getElementById('navDashboardBtn').addEventListener('click', () => {
+        state.activeTab = 'dashboard';
+        renderApp();
+      });
+      document.getElementById('navIdiomsBtn').addEventListener('click', () => {
+        state.activeTab = 'idioms';
+        renderApp();
+      });
 
-      if (e.code === 'Space') {
+      // Toggle Sidebar
+      document.getElementById('toggleSidebarBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+
+      // Filters
+      document.getElementById('filterAllBtn').addEventListener('click', () => {
+        state.filterMode = 'all';
+        state.currentCardIndex = 0;
+        state.isFlipped = false;
+        renderCard();
+      });
+      document.getElementById('filterUnmasteredBtn').addEventListener('click', () => {
+        state.filterMode = 'unmastered';
+        state.currentCardIndex = 0;
+        state.isFlipped = false;
+        renderCard();
+      });
+      document.getElementById('filterMasteredBtn').addEventListener('click', () => {
+        state.filterMode = 'mastered';
+        state.currentCardIndex = 0;
+        state.isFlipped = false;
+        renderCard();
+      });
+
+      // Flashcard Touch/Click Flip
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      const card3DContainer = document.getElementById('flashcard3DContainer');
+      
+      card3DContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      card3DContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (diff > 50) {
+          navigateNext();
+        } else if (diff < -50) {
+          navigatePrev();
+        } else {
+          toggleFlip();
+        }
+      }, { passive: true });
+
+      card3DContainer.addEventListener('click', (e) => {
+        if (!('ontouchstart' in window)) {
+          toggleFlip();
+        }
+      });
+
+      // Buttons
+      document.getElementById('prevCardBtn').addEventListener('click', navigatePrev);
+      document.getElementById('nextCardBtn').addEventListener('click', navigateNext);
+      document.getElementById('markUnmasteredBtn').addEventListener('click', () => markProgress(false));
+      document.getElementById('markMasteredBtn').addEventListener('click', () => markProgress(true));
+      document.getElementById('shuffleCardsBtn').addEventListener('click', handleShuffle);
+      document.getElementById('resetProgressBtn').addEventListener('click', resetProgress);
+      document.getElementById('quickDeleteCardBtn').addEventListener('click', deleteCurrentCard);
+      document.getElementById('resetFilterEmptyBtn').addEventListener('click', () => {
+        state.filterMode = 'all';
+        renderCard();
+      });
+
+      // Modals Trigger
+      document.getElementById('addThemeBtn').addEventListener('click', () => openModal('addThemeModal'));
+      document.getElementById('addNewCardBtn').addEventListener('click', () => openModal('addCardModal'));
+
+      document.querySelectorAll('.closeModalBtn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.target.closest('.fixed').classList.add('hidden');
+        });
+      });
+
+      // Admin Login
+      document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        toggleFlip();
-      } else if (e.code === 'ArrowRight') {
-        navigateNext();
-      } else if (e.code === 'ArrowLeft') {
-        navigatePrev();
-      }
+        const u = document.getElementById('loginUsername').value;
+        const p = document.getElementById('loginPassword').value;
+
+        if (u === 'chunghaoky' && p === '123456789') {
+          state.isAdmin = true;
+          saveState();
+          closeModal('loginModal');
+          renderApp();
+          document.getElementById('loginUsername').value = '';
+          document.getElementById('loginPassword').value = '';
+          document.getElementById('loginErrMsg').classList.add('hidden');
+        } else {
+          const err = document.getElementById('loginErrMsg');
+          err.innerText = "Sai tài khoản hoặc mật khẩu quản trị!";
+          err.classList.remove('hidden');
+        }
+      });
+
+      // Add Theme Form
+      document.getElementById('addThemeForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('newThemeNameInput').value.trim();
+        if (name) {
+          if (!state.idiomDecks[name]) state.idiomDecks[name] = [];
+          state.activeIdiomTheme = name;
+          saveState();
+          closeModal('addThemeModal');
+          document.getElementById('newThemeNameInput').value = '';
+          renderApp();
+        }
+      });
+
+      // Add Card Form
+      document.getElementById('addCardForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fullList = state.idiomDecks[state.activeIdiomTheme] || [];
+
+        const newCard = {
+          stt: parseInt(document.getElementById('newCardStt').value) || (fullList.length + 1),
+          tiengTrung: document.getElementById('newCardTiengTrung').value.trim(),
+          pinyin: document.getElementById('newCardPinyin').value.trim(),
+          nghia: document.getElementById('newCardNghia').value.trim(),
+          vd1: document.getElementById('newCardVd1').value.trim(),
+          pinyin1: document.getElementById('newCardPinyin1').value.trim(),
+          nghia1: document.getElementById('newCardNghia1').value.trim(),
+          vd2: document.getElementById('newCardVd2').value.trim(),
+          pinyin2: document.getElementById('newCardPinyin2').value.trim(),
+          nghia2: document.getElementById('newCardNghia2').value.trim(),
+          vd3: document.getElementById('newCardVd3').value.trim(),
+          pinyin3: document.getElementById('newCardPinyin3').value.trim(),
+          nghia3: document.getElementById('newCardNghia3').value.trim()
+        };
+
+        state.idiomDecks[state.activeIdiomTheme].push(newCard);
+        state.idiomDecks[state.activeIdiomTheme].sort((a, b) => a.stt - b.stt);
+
+        saveState();
+        closeModal('addCardModal');
+        document.getElementById('addCardForm').reset();
+        renderApp();
+        showAlert("✨ Đã tạo thành công thẻ thành ngữ mới!");
+      });
+
+      // CSV Upload
+      document.getElementById('uploadCsvTriggerBtn').addEventListener('click', () => {
+        document.getElementById('csvFileInput').click();
+      });
+      document.getElementById('csvFileInput').addEventListener('change', handleCsvFileParser);
+      document.getElementById('downloadSampleCsvBtn').addEventListener('click', downloadSampleCsv);
+
+      // Confirm Dialog
+      document.getElementById('customConfirmOkBtn').addEventListener('click', () => {
+        if (confirmCallback) confirmCallback();
+        closeModal('customConfirmModal');
+      });
+      document.getElementById('customConfirmCancelBtn').addEventListener('click', () => {
+        closeModal('customConfirmModal');
+      });
+
+      // Keyboard Hotkeys
+      window.addEventListener('keydown', (e) => {
+        if (state.activeTab !== 'idioms') return;
+        if (!document.getElementById('loginModal').classList.contains('hidden') ||
+            !document.getElementById('addCardModal').classList.contains('hidden') ||
+            !document.getElementById('addThemeModal').classList.contains('hidden')) return;
+
+        if (e.code === 'Space') {
+          e.preventDefault();
+          toggleFlip();
+        } else if (e.code === 'ArrowRight') {
+          navigateNext();
+        } else if (e.code === 'ArrowLeft') {
+          navigatePrev();
+        }
+      });
     });
   </script>
 </body>
 </html>
+```
