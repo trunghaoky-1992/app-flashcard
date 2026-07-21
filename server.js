@@ -76,6 +76,47 @@ app.post('/api/themes/sync', async (req, res) => {
   }
 });
 
+// AI Endpoint: Tự động chuyển đổi câu ví dụ tiếng Trung thành Pinyin
+app.post('/api/generate-pinyin', async (req, res) => {
+  const { examples } = req.body;
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!examples || !Array.isArray(examples)) {
+    return res.status(400).json({ error: 'Vui lòng cung cấp danh sách câu ví dụ!' });
+  }
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Chưa cấu hình GEMINI_API_KEY trên server!' });
+  }
+
+  try {
+    const prompt = `Chuyển đổi các câu tiếng Trung sau đây thành Pinyin có dấu thanh điệu đầy đủ.
+Danh sách câu:
+${examples.map((ex, index) => `${index + 1}. ${ex}`).join('\n')}
+
+Trả về kết quả DUY NHẤT dưới dạng mảng JSON các chuỗi Pinyin (không chứa markdown, không chứa chữ Hán, không chứa chữ dư thừa):
+["Pinyin câu 1", "Pinyin câu 2", "Pinyin câu 3"]`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+
+    const data = await response.json();
+    const rawText = data.candidates[0].content.parts[0].text;
+    const cleanJson = rawText.replace(/```json|```/g, '').trim();
+    const pinyinList = JSON.parse(cleanJson);
+
+    res.json({ success: true, pinyinList });
+  } catch (error) {
+    console.error("Lỗi tạo Pinyin:", error);
+    res.status(500).json({ error: 'Tạo Pinyin tự động thất bại!' });
+  }
+});
+
 // Send UI client
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
