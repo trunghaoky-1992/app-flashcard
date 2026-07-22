@@ -162,7 +162,7 @@
             </button>
             <button id="downloadSampleCsvBtn" class="w-full bg-stone-300 dark:bg-stone-700 text-stone-800 dark:text-stone-200 text-[10px] py-1 px-2 rounded text-center hover:underline flex items-center justify-center space-x-1">
               <i class="fa-solid fa-download"></i>
-              <span>Tải Mẫu Địn Dạng CSV</span>
+              <span>Tải Mẫu Định Dạng CSV</span>
             </button>
           </div>
           <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
@@ -337,7 +337,7 @@
                 </div>
 
                 <div class="text-center text-[10px] text-stone-400 font-vietnamese">
-                  Chạm/Click hoặc phím Cách để lật mặt sau
+                  Chạm/Click 2 lần liên tiếp để lật mặt sau
                 </div>
               </div>
 
@@ -363,7 +363,7 @@
                 </div>
 
                 <div class="text-center text-[10px] text-stone-400 font-vietnamese">
-                  Chạm/Click để đóng mặt trước
+                  Chạm/Click 2 lần để quay lại mặt trước
                 </div>
               </div>
 
@@ -1265,9 +1265,10 @@ Sentences: ${JSON.stringify(sentences)}`;
         renderCard();
       });
 
-      // Flashcard Touch/Click Flip
+      // Flashcard Touch/Click Flip (Đã tối ưu Chạm/Click 2 lần - Double Tap)
       let touchStartX = 0;
       let touchEndX = 0;
+      let lastTapTime = 0;
 
       const card3DContainer = document.getElementById('flashcard3DContainer');
       
@@ -1278,16 +1279,27 @@ Sentences: ${JSON.stringify(sentences)}`;
       card3DContainer.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         const diff = touchStartX - touchEndX;
+
+        // Nếu vuốt sang trái/phải quá 50px -> Vuốt đổi thẻ
         if (diff > 50) {
           navigateNext();
         } else if (diff < -50) {
           navigatePrev();
         } else {
-          toggleFlip();
-        }
-      }, { passive: true });
+          // Xử lý chạm 2 lần liên tiếp (Double Tap) trên Mobile
+          const currentTime = new Date().getTime();
+          const tapLength = currentTime - lastTapTime;
 
-      card3DContainer.addEventListener('click', (e) => {
+          if (tapLength < 300 && tapLength > 10) {
+            toggleFlip();
+            e.preventDefault();
+          }
+          lastTapTime = currentTime;
+        }
+      }, { passive: false });
+
+      // Click 2 lần trên Máy tính (Desktop Double Click)
+      card3DContainer.addEventListener('dblclick', (e) => {
         if (!('ontouchstart' in window)) {
           toggleFlip();
         }
@@ -1418,4 +1430,3 @@ Sentences: ${JSON.stringify(sentences)}`;
   </script>
 </body>
 </html>
-```
